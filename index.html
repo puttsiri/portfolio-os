@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio OS · v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0A0A0A; --ink2:#18181B; --ink3:#27272A; --sidebar:#161618;
+  --lav:#EDE9FE; --lav2:#A78BFA; --lav-d:#6D28D9;
+  --mint:#D1FAE5; --mint2:#6EE7B7; --yel:#FEF9C3; --yel2:#FDE68A; --blush:#FCE7F3; --blush2:#FBCFE8; --sky:#BAE6FD;
+  --bg:#F9FAFB; --card:#FFFFFF; --line:#E5E7EB; --line2:#F3F4F6;
+  --tx:#111827; --tx2:#6B7280; --tx3:#9CA3AF;
+  --grn:#059669; --grn-bg:#D1FAE5; --red:#DC2626; --red-bg:#FEE2E2; --amb:#D97706; --amb-bg:#FEF3C7;
+  --sans:'Inter',system-ui,sans-serif; --mono:'Space Mono',monospace;
+  --r:10px; --r2:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--tx);font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.app{display:grid;grid-template-columns:208px 1fr;min-height:100vh}
+button{font-family:var(--sans);cursor:pointer}
+input,select,textarea{font-family:var(--sans);font-size:13px}
+.mono{font-family:var(--mono)}
+.pos{color:var(--grn)} .neg{color:var(--red)} .ambx{color:var(--amb)}
+
+/* ---------- SIDEBAR ---------- */
+.sidebar{background:var(--sidebar);padding:0;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:18px 18px 16px;border-bottom:1px solid #232326}
+.sb-mark{width:30px;height:30px;border-radius:8px;background:var(--lav2);display:flex;align-items:center;justify-content:center;font-weight:700;color:#1A1023;font-size:15px}
+.sb-name{font-size:14px;font-weight:600;color:#fff;letter-spacing:-.02em}
+.sb-name span{color:#6B7280;font-weight:400;font-size:11px;margin-left:2px}
+.sb-sect{font-size:9px;text-transform:uppercase;letter-spacing:.13em;color:#52525B;font-weight:600;padding:14px 18px 5px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:8px 18px;font-size:12.5px;color:#A1A1AA;cursor:pointer;border-left:2px solid transparent;transition:all .15s}
+.sb-item:hover{color:#fff;background:rgba(167,139,250,.08)}
+.sb-item.on{color:#fff;background:rgba(167,139,250,.14);border-left-color:var(--lav2);font-weight:500}
+.sb-ic{width:18px;text-align:center;font-size:13px;opacity:.85;flex-shrink:0}
+.sb-foot{margin-top:auto;padding:14px 18px;border-top:1px solid #232326}
+.sb-sync{display:flex;align-items:center;gap:7px;font-size:10.5px;color:#71717A}
+.sb-dot{width:6px;height:6px;border-radius:50%;background:var(--mint2)}
+
+/* ---------- MAIN ---------- */
+.main{min-width:0}
+.topbar{background:var(--ink);height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:sticky;top:0;z-index:20}
+.tb-search{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:7px 13px;font-size:12px;color:#fff;width:300px;outline:none}
+.tb-search::placeholder{color:rgba(255,255,255,.35)}
+.tb-right{display:flex;align-items:center;gap:8px}
+.tb-btn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#D4D4D8;border-radius:8px;padding:7px 12px;font-size:11.5px;font-weight:500;display:flex;align-items:center;gap:6px}
+.tb-btn:hover{background:rgba(255,255,255,.13)}
+.tb-btn.accent{background:var(--lav2);border-color:var(--lav2);color:#1A1023;font-weight:600}
+.tb-avatar{width:32px;height:32px;border-radius:50%;background:var(--lav2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#1A1023}
+.view{display:none;animation:fade .3s ease}
+.view.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- HERO (dashboard) ---------- */
+.hero{background:var(--ink);padding:6px 22px 24px}
+.hero-row{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px}
+.hero-greet{font-size:11px;color:#71717A}
+.hero-name{font-size:21px;font-weight:700;color:#fff;letter-spacing:-.03em;margin-top:2px}
+.hero-sub{font-size:11px;color:#52525B;margin-top:3px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kpi{border-radius:var(--r2);padding:15px 16px}
+.kpi.k1{background:var(--lav)} .kpi.k2{background:var(--mint)} .kpi.k3{background:var(--yel)} .kpi.k4{background:var(--blush)}
+.kpi-top{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.kpi-ic{width:32px;height:32px;border-radius:9px;background:rgba(0,0,0,.07);display:flex;align-items:center;justify-content:center;font-size:14px}
+.kpi-l{font-size:11px;font-weight:500;color:#374151}
+.kpi-v{font-size:21px;font-weight:700;color:#111;letter-spacing:-.03em;line-height:1;margin-bottom:6px}
+.kpi-bot{display:flex;align-items:center;justify-content:space-between}
+.kpi-tag{font-size:10.5px;font-weight:600}
+.spark{height:26px;width:74px}
+
+/* ---------- BODY / PAGES ---------- */
+.body{padding:20px 22px 60px}
+.page-head{margin-bottom:16px}
+.page-ey{font-size:10px;text-transform:uppercase;letter-spacing:.13em;color:var(--lav-d);font-weight:600;margin-bottom:5px;font-family:var(--mono)}
+.page-title{font-size:20px;font-weight:700;color:var(--tx);letter-spacing:-.025em}
+.page-sub{font-size:12px;color:var(--tx2);margin-top:2px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid-2-1{display:grid;grid-template-columns:1.4fr 1fr;gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:16px}
+.card.pad0{padding:0;overflow:hidden}
+.card-t{font-size:13px;font-weight:600;color:var(--tx);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.card-t .sub{font-size:10.5px;color:var(--tx3);font-weight:400}
+.mb14{margin-bottom:14px}
+.row-between{display:flex;justify-content:space-between;align-items:center}
+
+/* signal banner */
+.signal{background:var(--lav);border:1px solid #DDD6FE;border-radius:var(--r2);padding:11px 15px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.signal-t{font-size:11.5px;color:#5B21B6}
+.signal-t b{color:#4C1D95}
+.pills{display:flex;gap:5px;flex-shrink:0}
+.sp{font-size:9px;font-weight:700;padding:3px 9px;border-radius:12px;letter-spacing:.03em;white-space:nowrap}
+.sp-g{background:var(--mint);color:#065F46} .sp-y{background:var(--yel);color:#854D0E} .sp-r{background:var(--blush);color:#9D174D} .sp-b{background:var(--sky);color:#075985}
+
+/* tables */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:9.5px;color:var(--tx3);font-weight:600;text-align:left;padding:0 10px 9px;text-transform:uppercase;letter-spacing:.05em}
+.tbl td{padding:9px 10px;border-top:1px solid var(--line2);font-size:11.5px;color:var(--tx2);vertical-align:middle}
+.tbl td.name{font-weight:600;color:var(--tx)}
+.tbl tr:hover td{background:#FAFAFB}
+
+/* mobile card lists (replace tables under 920px) */
+.m-card-list{display:flex;flex-direction:column;gap:10px}
+.m-card{border:1px solid var(--line);border-radius:var(--r2);padding:14px;background:#fff}
+.m-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.m-card-name{font-size:14px;font-weight:700;color:var(--tx)}
+.m-card-sub{font-size:10.5px;color:var(--tx3);margin-top:2px}
+.m-card-val{text-align:right;flex-shrink:0}
+.m-card-val .mono{font-size:13.5px;font-weight:700;color:var(--tx)}
+.m-card-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line2)}
+.m-card-grid div{display:flex;justify-content:space-between;font-size:11.5px;gap:8px}
+.m-card-grid span{color:var(--tx3)}
+.m-card-grid b{font-weight:600;color:var(--tx)}
+.m-card-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.m-card-actions{display:flex;gap:8px;margin-top:12px}
+.m-card-actions button{flex:1;min-height:42px}
+.chip{font-size:9.5px;font-weight:600;padding:2px 8px;border-radius:20px;display:inline-block}
+.chip-g{background:var(--mint);color:#065F46} .chip-y{background:var(--yel);color:#854D0E} .chip-r{background:var(--blush);color:#9D174D} .chip-b{background:var(--sky);color:#075985} .chip-n{background:#F3F4F6;color:#6B7280}
+.badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px;text-transform:uppercase;letter-spacing:.04em}
+.bd-stock{background:#EDE9FE;color:#6D28D9} .bd-fund{background:#D1FAE5;color:#047857} .bd-etf{background:#FEF9C3;color:#A16207} .bd-crypto{background:#FCE7F3;color:#BE185D} .bd-other{background:#F3F4F6;color:#4B5563}
+
+/* buttons / forms */
+.btn{background:var(--lav2);color:#1A1023;border:none;border-radius:8px;padding:7px 14px;font-size:11.5px;font-weight:600}
+.btn:hover{background:#9173e6}
+.btn-ghost{background:#fff;color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:7px 14px;font-size:11.5px;font-weight:500}
+.btn-ghost:hover{background:#FAFAFB}
+.btn-sm{padding:4px 10px;font-size:10.5px}
+.field{margin-bottom:11px}
+.field label{display:block;font-size:10.5px;color:var(--tx2);font-weight:500;margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#fff;color:var(--tx);outline:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--lav2);box-shadow:0 0 0 3px rgba(167,139,250,.15)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* metric tiles */
+.mtile{background:var(--bg);border-radius:var(--r);padding:12px 14px}
+.mtile .l{font-size:10px;color:var(--tx2);font-weight:500;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+.mtile .v{font-size:18px;font-weight:700;color:var(--tx);letter-spacing:-.02em}
+.mtile .s{font-size:10px;margin-top:2px}
+
+/* progress bars */
+.bar{background:var(--line2);border-radius:5px;height:7px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:5px;background:var(--lav2)}
+.bar.g i{background:var(--mint2)} .bar.y i{background:var(--yel2)}
+
+/* tax gauge */
+.gauge-wrap{display:flex;align-items:center;gap:20px}
+.deduction-row{display:grid;grid-template-columns:140px 1fr 90px;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--line2)}
+.deduction-row:first-child{border-top:none}
+.ded-name{font-size:11.5px;color:var(--tx);font-weight:500}
+.ded-name small{display:block;color:var(--tx3);font-size:9.5px;font-weight:400}
+.ded-amt{text-align:right;font-family:var(--mono);font-size:11px}
+.ded-amt b{color:var(--tx)} .ded-amt span{color:var(--tx3)}
+
+/* AI desk */
+.persona-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.persona{border:1px solid var(--line);border-radius:var(--r2);padding:14px;cursor:pointer;transition:all .15s}
+.persona:hover{border-color:var(--lav2);background:#FCFBFF}
+.persona.on{border-color:var(--lav2);background:var(--lav)}
+.persona-av{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;margin-bottom:9px}
+.persona-name{font-size:14px;font-weight:600;color:var(--tx)}
+.persona-role{font-size:10px;color:var(--lav-d);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin:1px 0 7px}
+.persona-desc{font-size:11px;color:var(--tx2);line-height:1.45}
+.chatbox{background:var(--bg);border:1px solid var(--line);border-radius:var(--r2);padding:14px}
+.chat-msg{margin-bottom:11px}
+.chat-from{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+.chat-bubble{font-size:12px;line-height:1.55;color:var(--tx)}
+.chat-bubble.ai{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.chat-input-row{display:flex;gap:8px;margin-top:10px}
+.chat-input{flex:1;border:1px solid var(--line);border-radius:8px;padding:9px 12px;outline:none}
+
+/* rules */
+.rule-row{display:flex;align-items:center;gap:11px;padding:10px 0;border-top:1px solid var(--line2)}
+.rule-row:first-child{border-top:none}
+.rt{font-size:9px;font-weight:700;padding:2px 8px;border-radius:5px;text-transform:uppercase;flex-shrink:0;width:74px;text-align:center}
+.rt-port{background:#D1FAE5;color:#047857} .rt-macro{background:#EDE9FE;color:#6D28D9} .rt-fx{background:#FEF9C3;color:#A16207} .rt-dca{background:#FCE7F3;color:#BE185D} .rt-cal{background:#E0E7FF;color:#4338CA}
+.rule-desc{flex:1;font-size:11.5px;color:var(--tx)}
+.rule-act{font-size:9px;font-weight:700;padding:2px 8px;border-radius:12px;flex-shrink:0}
+
+/* tutorial */
+.tut-toc{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
+.tut-ch{border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;cursor:pointer}
+.tut-ch:hover{border-color:var(--lav2);background:#FCFBFF}
+.tut-ch-n{font-size:9px;color:var(--lav-d);font-weight:700;font-family:var(--mono);margin-bottom:3px}
+.tut-ch-t{font-size:12.5px;font-weight:600;color:var(--tx);margin-bottom:2px}
+.tut-ch-d{font-size:10.5px;color:var(--tx2);line-height:1.4}
+.tut-body h3{font-size:15px;margin:18px 0 8px;color:var(--tx)}
+.tut-body p{font-size:12.5px;color:var(--tx2);margin-bottom:9px;line-height:1.6}
+.tut-body code{background:var(--lav);color:var(--lav-d);padding:1px 6px;border-radius:4px;font-family:var(--mono);font-size:11px}
+.tut-body .step{display:flex;gap:11px;margin-bottom:9px}
+.tut-body .step b{color:var(--lav2);font-family:var(--mono)}
+
+.empty{text-align:center;padding:30px;color:var(--tx3);font-size:12px}
+.note{background:var(--lav);border:1px solid #DDD6FE;border-radius:var(--r);padding:11px 13px;font-size:11px;color:#5B21B6;line-height:1.5}
+.donut-legend{display:flex;flex-direction:column;gap:6px}
+.dl-row{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--tx2)}
+.dl-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.dl-pct{margin-left:auto;font-weight:600;color:var(--tx);font-family:var(--mono);font-size:11px}
+.disclaimer{margin-top:24px;padding:13px 15px;background:#fff;border:1px solid var(--line);border-radius:var(--r);color:var(--tx3);font-size:10.5px;line-height:1.6}
+
+/* ---------- MODAL ---------- */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center}
+.modal-bg.open{display:flex;animation:fade .2s ease}
+.modal{background:#fff;border-radius:16px;padding:24px;width:480px;max-width:94vw;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px -12px rgba(0,0,0,.3)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-title{font-size:16px;font-weight:700;color:var(--tx)}
+.modal-close{background:none;border:none;font-size:20px;color:var(--tx3);cursor:pointer;line-height:1;padding:2px 6px}
+.modal-close:hover{color:var(--tx)}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+
+/* Mobile nav */
+.mob-nav{display:none;background:var(--ink);height:50px;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:30}
+.mob-logo{color:#fff;font-size:14px;font-weight:600}
+.mob-ham{background:none;border:none;color:#fff;font-size:20px;cursor:pointer;width:44px;height:44px;display:flex;align-items:center;justify-content:center;margin-left:-10px}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:40}
+.sb-overlay.open{display:block}
+.sb-mobile-actions{display:none}
+.sb-mobile-actions .tb-btn{min-height:42px;justify-content:center;width:100%}
+.sb-mobile-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:920px){
+  .app{grid-template-columns:1fr}
+  .sidebar{position:fixed;left:-220px;top:0;z-index:50;transition:left .25s;height:100vh;overflow-y:auto}
+  .sidebar.open{left:0}
+  .mob-nav{display:flex}
+  .topbar{display:none}
+  .kpis,.grid2,.grid3,.grid-2-1{grid-template-columns:1fr}
+  .sb-mobile-actions{display:block;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:6px}
+  .sb-item{padding:13px 18px;font-size:13.5px;min-height:44px}
+  .growth-controls{width:100%;justify-content:space-between!important}
+  .growth-controls select{flex:1;min-width:0}
+  #growthRangePills .chip{padding:7px 10px;font-size:10.5px;min-height:30px;display:inline-flex;align-items:center}
+  .m-card-actions button{min-height:44px}
+}
+
+/* ---------- LOGIN OVERLAY (cloud mode only) ---------- */
+.auth-overlay{display:none;position:fixed;inset:0;z-index:300;background:var(--ink);align-items:center;justify-content:center;padding:20px}
+.auth-overlay.show{display:flex}
+.auth-card{background:#fff;border-radius:18px;padding:32px 28px;width:380px;max-width:94vw;box-shadow:0 24px 60px -12px rgba(0,0,0,.4)}
+.auth-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;margin-bottom:22px}
+.auth-title{font-size:22px;font-weight:700;margin-bottom:6px;color:var(--tx)}
+.auth-sub{font-size:12.5px;color:var(--tx2);margin-bottom:20px;line-height:1.5}
+.auth-input{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:14px;margin-bottom:12px;outline:none;font-family:var(--sans)}
+.auth-input:focus{border-color:var(--lav2);box-shadow:0 0 0 3px rgba(167,139,250,.15)}
+.auth-btn{width:100%;background:var(--lav2);color:#1A1023;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;min-height:46px}
+.auth-btn:disabled{opacity:.6;cursor:default}
+.auth-msg{font-size:12px;color:var(--tx2);margin-top:12px;min-height:16px;line-height:1.5}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div id="authOverlay" class="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-logo"><span style="width:26px;height:26px;border-radius:7px;background:var(--lav2);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700">P</span> Portfolio OS</div>
+    <div class="auth-title">Sign in</div>
+    <div class="auth-sub">Enter your email and we'll send you a one-tap login link — no password to remember. Your portfolio syncs across every device you sign in on.</div>
+    <input id="authEmail" type="email" class="auth-input" placeholder="you@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')sendMagicLink()">
+    <button id="authBtn" class="auth-btn" onclick="sendMagicLink()">Send me a login link</button>
+    <div id="authMsg" class="auth-msg"></div>
+  </div>
+</div>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-mark">P</div>
+      <div class="sb-name">Portfolio OS <span>v2</span></div>
+    </div>
+    <div class="sb-mobile-actions">
+      <div class="sb-mobile-btns">
+        <button class="tb-btn" onclick="refreshPrices();closeSidebar()"><span>↻</span> Prices</button>
+        <button class="tb-btn" onclick="openGuide();closeSidebar()"><span>◉</span> Guide</button>
+        <button class="tb-btn" onclick="exportJSON();closeSidebar()"><span>↓</span> Export</button>
+        <button class="tb-btn accent" onclick="syncPrompt();closeSidebar()"><span>↑</span> Sync Sheet</button>
+      </div>
+    </div>
+    <div class="sb-sect">Overview</div>
+    <div class="sb-item on" data-view="dashboard"><span class="sb-ic">▦</span> Dashboard</div>
+    <div class="sb-item" data-view="holdings"><span class="sb-ic">◧</span> Holdings</div>
+    <div class="sb-sect">Planning</div>
+    <div class="sb-item" data-view="dca"><span class="sb-ic">↺</span> DCA Planner</div>
+    <div class="sb-item" data-view="tx"><span class="sb-ic">⇄</span> Transactions</div>
+    <div class="sb-item" data-view="fx"><span class="sb-ic">◎</span> FX Tracker</div>
+    <div class="sb-sect">Money</div>
+    <div class="sb-item" data-view="tax"><span class="sb-ic">⛨</span> Tax Centre</div>
+    <div class="sb-item" data-view="expenses"><span class="sb-ic">▤</span> Expenses</div>
+    <div class="sb-sect">Intelligence</div>
+    <div class="sb-item" data-view="ai"><span class="sb-ic">✦</span> AI Desk</div>
+    <div class="sb-item" data-view="rules"><span class="sb-ic">⚡</span> Signal Rules</div>
+    <div class="sb-item" data-view="scout"><span class="sb-ic">⌖</span> Scout</div>
+    <div class="sb-sect">Reference</div>
+    <div class="sb-item" data-view="tutorial"><span class="sb-ic">◉</span> Tutorial</div>
+    <div class="sb-item" data-view="settings"><span class="sb-ic">⚙</span> Settings</div>
+    <div class="sb-foot">
+      <div class="sb-sync"><span class="sb-dot"></span> <span id="syncStatus">Saved locally</span></div>
+      <div id="sbAccount" style="display:none;margin-top:8px;font-size:10.5px;color:#71717A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+        <span id="sbUserEmail"></span>
+        <button onclick="signOut()" style="background:none;border:none;color:var(--lav2);cursor:pointer;padding:0;margin-left:6px;font-size:10.5px;font-family:var(--sans)">Sign out</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <!-- Mobile nav -->
+    <div class="mob-nav">
+      <button class="mob-ham" onclick="openSidebar()">☰</button>
+      <span class="mob-logo">Portfolio OS</span>
+      <div class="tb-avatar">P</div>
+    </div>
+    <div class="topbar">
+      <input class="tb-search" placeholder="Search positions, expenses, signals…">
+      <div class="tb-right">
+        <button class="tb-btn" onclick="refreshPrices()"><span>↻</span> Prices</button>
+        <button class="tb-btn" onclick="openGuide()"><span>◉</span> Guide</button>
+        <button class="tb-btn" onclick="exportJSON()"><span>↓</span> Export</button>
+        <button class="tb-btn accent" onclick="syncPrompt()"><span>↑</span> Sync Sheet</button>
+        <div class="tb-avatar">P</div>
+      </div>
+    </div>
+
+    <!-- ===== DASHBOARD ===== -->
+    <section class="view on" id="view-dashboard">
+      <div class="hero">
+        <div class="hero-row">
+          <div>
+            <div class="hero-greet">Good morning</div>
+            <div class="hero-name">Hello, Putt.</div>
+            <div class="hero-sub" id="heroSub">Loading your portfolio…</div>
+          </div>
+        </div>
+        <div class="kpis" id="kpis"></div>
+      </div>
+      <div class="body">
+        <div class="signal" id="signalBanner"></div>
+        <div class="grid-2-1 mb14">
+          <div class="card">
+            <div class="row-between" style="margin-bottom:4px;flex-wrap:wrap;gap:8px">
+              <div class="card-t" style="margin-bottom:0">Portfolio growth <span class="sub">invested vs value</span></div>
+              <div class="growth-controls" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <select id="growthScopeSel" onchange="setGrowthScope(this.value)" style="font-size:10.5px;padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--tx)"></select>
+                <div id="growthRangePills" style="display:flex;gap:4px"></div>
+                <label id="growthBenchLabel" style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--tx2);cursor:pointer"><input type="checkbox" id="growthBenchChk" onchange="toggleGrowthBench()" style="width:auto"> vs S&P 500</label>
+              </div>
+            </div>
+            <div id="growthChart"></div>
+          </div>
+          <div class="card">
+            <div class="card-t">Allocation <span class="sub">by asset class</span></div>
+            <div id="allocChart"></div>
+          </div>
+        </div>
+        <div class="grid3 mb14">
+          <div class="card"><div class="card-t">Tax saved YTD</div><div id="taxMini"></div></div>
+          <div class="card"><div class="card-t">Expenses MTD</div><div id="expMini"></div></div>
+          <div class="card"><div class="card-t">Next DCA</div><div id="dcaMini"></div></div>
+        </div>
+        <div class="card mb14"><div class="card-t">vs Benchmark <span class="sub">portfolio YTD vs index · update in Settings</span></div><div id="benchCard"></div></div>
+        <div class="card pad0">
+          <div style="padding:16px 16px 0"><div class="card-t">Holdings <span class="sub" id="holdCount"></span></div></div>
+          <div style="padding:0 6px 8px" id="dashHoldings"></div>
+        </div>
+        <div class="disclaimer">Decision-support tool, not financial or tax advice — I'm not a licensed advisor. Tax figures use 2026 Thai progressive bands and are estimates to verify with a tax professional. Live prices and FX are fetched on request; everything persists in your browser and syncs to your Google Sheet via chat.</div>
+      </div>
+    </section>
+
+    <!-- ===== HOLDINGS ===== -->
+    <section class="view" id="view-holdings">
+      <div class="body">
+        <div class="page-head row-between">
+          <div><div class="page-ey">Portfolio · all asset classes</div><div class="page-title">Holdings</div><div class="page-sub" id="holdSub"></div></div>
+          <button class="btn" onclick="addHolding()">+ Add position</button>
+        </div>
+        <div class="card pad0"><div style="padding:6px" id="holdingsTbl"></div></div>
+        <div class="note" style="margin-top:14px">Tip: tell me <code>"bought 10 TSMC at $185 via IBKR"</code> in chat and I'll log it here and to your Sheet. Flag a position as tax-advantaged (RMF/ThaiESG/SSF) and it feeds the Tax Centre automatically.</div>
+      </div>
+    </section>
+
+    <!-- ===== DCA PLANNER ===== -->
+    <section class="view" id="view-dca">
+      <div class="body">
+        <div class="page-head row-between">
+          <div><div class="page-ey">Scheduled investing</div><div class="page-title">DCA Planner</div><div class="page-sub" id="dcaSub"></div></div>
+          <button class="btn" onclick="addDCA()">+ Add schedule</button>
+        </div>
+        <div id="dcaList"></div>
+      </div>
+    </section>
+
+    <!-- ===== TRANSACTIONS ===== -->
+    <section class="view" id="view-tx">
+      <div class="body">
+        <div class="page-head row-between">
+          <div><div class="page-ey">Cash flow ledger</div><div class="page-title">Transactions</div><div class="page-sub">Salary in → allocations → expenses out → remaining</div></div>
+          <button class="btn" onclick="addTx()">+ Add transaction</button>
+        </div>
+        <div class="grid3 mb14" id="txKpis"></div>
+        <div class="card pad0"><div style="padding:6px" id="txTbl"></div></div>
+      </div>
+    </section>
+
+    <!-- ===== FX ===== -->
+    <section class="view" id="view-fx">
+      <div class="body">
+        <div class="page-head"><div class="page-ey">Currency</div><div class="page-title">FX Tracker</div><div class="page-sub">THB/USD per period · per-position currency gain split · remittance timing</div></div>
+        <div class="grid2 mb14">
+          <div class="card"><div class="card-t">THB / USD <span class="sub" id="fxNow"></span></div><div id="fxChart"></div></div>
+          <div class="card"><div class="card-t">Currency vs asset gain <span class="sub">USD holdings, THB terms</span></div><div id="fxSplit"></div></div>
+        </div>
+        <div class="card"><div class="card-t">Remittance planner</div><div id="remit"></div></div>
+      </div>
+    </section>
+
+    <!-- ===== TAX CENTRE ===== -->
+    <section class="view" id="view-tax">
+      <div class="body">
+        <div class="page-head"><div class="page-ey">Thai tax · year 2026</div><div class="page-title">Tax Centre</div><div class="page-sub">Income, deductions, dynamic tax & savings — verify with a tax professional before filing</div></div>
+        <div class="grid3 mb14" id="taxKpis"></div>
+        <div class="grid-2-1 mb14">
+          <div class="card">
+            <div class="card-t">Deduction tracker <span class="sub">used vs maximum · <button class="btn-ghost btn-sm" onclick="editDeductions()">Edit amounts</button></span></div>
+            <div id="dedTracker"></div>
+          </div>
+          <div class="card">
+            <div class="card-t">Tax-saving gauge</div>
+            <div id="taxGauge"></div>
+          </div>
+        </div>
+        <div class="grid2 mb14">
+          <div class="card"><div class="card-t">Income <span class="sub">2026</span></div><div id="incomeBox"></div></div>
+          <div class="card"><div class="card-t">Tax computation <span class="sub">progressive bands</span></div><div id="taxComp"></div></div>
+        </div>
+        <div class="card"><div class="card-t">Remittance impact</div><div id="taxRemit"></div></div>
+      </div>
+    </section>
+
+    <!-- ===== EXPENSES ===== -->
+    <section class="view" id="view-expenses">
+      <div class="body">
+        <div class="page-head row-between">
+          <div><div class="page-ey" id="expEy">Spending · month to date</div><div class="page-title">Expenses</div><div class="page-sub">Capture by chat (throw a slip / bill / message) or add manually</div></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn-ghost" onclick="captureSlip()">📄 Capture slip</button>
+            <button class="btn" onclick="addExpense()">+ Add expense</button>
+          </div>
+        </div>
+        <div class="grid3 mb14" id="expKpis"></div>
+        <div class="grid2 mb14">
+          <div class="card"><div class="card-t">MTD by category</div><div id="expByCat"></div></div>
+          <div class="card"><div class="card-t">Monthly trend <span class="sub">last 6 months</span></div><div id="expTrend"></div></div>
+        </div>
+        <div class="grid-2-1 mb14">
+          <div class="card pad0"><div style="padding:16px 16px 0"><div class="card-t">Recent expenses</div></div><div style="padding:0 6px 8px" id="expTbl"></div></div>
+          <div class="card"><div class="card-t">Subscriptions <span class="sub">recurring · <button class="btn-ghost btn-sm" onclick="addSub()">+ Add</button></span></div><div id="subsList"></div></div>
+        </div>
+        <div class="card"><div class="card-t">Account balances <span class="sub">where your money sits</span></div><div id="accList"></div></div>
+        <div class="note" style="margin-top:14px">Throw me a credit-card statement photo, a payment slip, or just say <code>"paid 1,200 at Villa Market"</code> — I'll extract merchant, amount, date, and category, then log it here and to the <code>Expenses_Log</code> Sheet tab.</div>
+      </div>
+    </section>
+
+    <!-- ===== AI DESK ===== -->
+    <section class="view" id="view-ai">
+      <div class="body">
+        <div class="page-head"><div class="page-ey">Your investment team · powered by Claude</div><div class="page-title">AI Desk</div><div class="page-sub">Pick a desk, then ask in chat — I respond in that role with your live data</div></div>
+        <div class="persona-grid" id="personas"></div>
+        <div class="card"><div id="aiChat"></div></div>
+      </div>
+    </section>
+
+    <!-- ===== SIGNAL RULES ===== -->
+    <section class="view" id="view-rules">
+      <div class="body">
+        <div class="page-head row-between">
+          <div><div class="page-ey">Automated conditions</div><div class="page-title">Signal Rules</div><div class="page-sub">Rules fire alerts on the dashboard & feed the AI Desk briefing</div></div>
+          <button class="btn" onclick="addRule()">+ Add rule</button>
+        </div>
+        <div class="card"><div id="rulesList"></div></div>
+        <div class="note" style="margin-top:14px"><b>Five rule families:</b> Portfolio (ROI, weight drift, concentration, drawdown) · Macro (RSI, 52-wk distance, factor shocks) · FX (THB move, remittance window) · DCA (end-date, override, cost spread) · Calendar (earnings, dividends, tax year-end). Add your own with any threshold.</div>
+      </div>
+    </section>
+
+    <!-- ===== SCOUT ===== -->
+    <section class="view" id="view-scout">
+      <div class="body">
+        <div class="page-head row-between">
+          <div><div class="page-ey">Opportunity scanner</div><div class="page-title">Scout</div><div class="page-sub">Finds new stocks, funds, ETFs, crypto aligned to your risk profile</div></div>
+          <button class="btn" onclick="scanNow()">⌖ Scan now</button>
+        </div>
+        <div id="scoutList"></div>
+      </div>
+    </section>
+
+    <!-- ===== TUTORIAL ===== -->
+    <section class="view" id="view-tutorial">
+      <div class="body">
+        <div class="page-head"><div class="page-ey">Living guide · auto-updated</div><div class="page-title">Tutorial</div><div class="page-sub" id="tutUpdated"></div></div>
+        <div class="tut-toc" id="tutToc"></div>
+        <div class="card"><div class="tut-body" id="tutBody"></div></div>
+      </div>
+    </section>
+
+    <!-- MODAL SYSTEM -->
+    <div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-head">
+          <div class="modal-title" id="modalTitle">Add</div>
+          <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div id="modalBody"></div>
+        <div class="modal-foot">
+          <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+          <button class="btn" id="modalSave" onclick="modalSubmit()">Save</button>
+        </div>
+      </div>
+    </div>
+    <!-- SIDEBAR OVERLAY (mobile) -->
+    <div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
+
+    <!-- ===== SETTINGS ===== -->
+    <section class="view" id="view-settings">
+      <div class="body">
+        <div class="page-head"><div class="page-ey">Configuration</div><div class="page-title">Settings</div><div class="page-sub">Profile, sync, data, and the Claude Code maintenance prompt</div></div>
+        <div class="grid2 mb14">
+          <div class="card"><div class="card-t">Profile & tax base</div><div id="profileBox"></div></div>
+          <div class="card"><div class="card-t">Data</div>
+            <p style="font-size:11.5px;color:var(--tx2);margin-bottom:12px">Everything lives in your browser (localStorage) and syncs to your Google Sheet via chat. Export a JSON backup anytime.</p>
+            <button class="btn-ghost" onclick="exportJSON()">↓ Export JSON</button>
+            <button class="btn-ghost" onclick="importJSON()">↑ Import JSON</button>
+            <button class="btn-ghost" onclick="if(confirm('Reset all local data?')){localStorage.removeItem(KEY);location.reload()}">⟲ Reset</button>
+            <div style="margin-top:12px;font-size:10.5px;color:var(--tx3)">Google Sheet: <a href="https://docs.google.com/spreadsheets/d/1ZMqx6qyCid3-3kyQRhkCmdxtdbwkyWZ68eOYDP7xdU4/edit" target="_blank" style="color:var(--lav-d)">Master Ledger v2 ↗</a></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-t">Claude Code · monthly maintenance prompt</div>
+          <p style="font-size:11.5px;color:var(--tx2);margin-bottom:10px">Paste this into Claude Code pointed at your portfolio repo to run the monthly update.</p>
+          <textarea id="ccPrompt" readonly style="width:100%;height:200px;border:1px solid var(--line);border-radius:8px;padding:11px;font-family:var(--mono);font-size:10.5px;line-height:1.5;color:var(--tx2);background:#FAFAFB"></textarea>
+          <button class="btn-ghost" style="margin-top:8px" onclick="copyCC()">⧉ Copy prompt</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+'use strict';
+const KEY='portfolioOS_v2';
+
+/* ============================================================================
+   ONLINE MODE — paste your two Supabase values below to turn on login + cross-
+   device sync. Leave them as-is and the tool runs exactly as before (offline,
+   this-browser-only, no login). The anon/public key is safe to put here; NEVER
+   paste the Supabase service_role key.
+   ============================================================================ */
+const SUPABASE_URL      = 'https://ufwthfgqkyipkdxoikhw.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmd3RoZmdxa3lpcGtkeG9pa2h3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyNTI1MDIsImV4cCI6MjA5ODgyODUwMn0.OCPf8NvzF_A91PlYKCGSQ9OGjm6rRsxe979n_c63-fg';
+const CLOUD_ENABLED = /^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(SUPABASE_URL) && SUPABASE_ANON_KEY.length>20;
+let sb=null, cloudUser=null, cloudPushTimer=null;
+const fmtTHB=n=>'฿'+Math.round(n).toLocaleString();
+const fmtTHBk=n=>n>=1e6?'฿'+(n/1e6).toFixed(2)+'M':n>=1e3?'฿'+(n/1e3).toFixed(0)+'k':'฿'+Math.round(n);
+const fmtUSD=n=>'$'+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+const pct=n=>(n>=0?'+':'')+n.toFixed(1)+'%';
+const todayISO=()=>new Date().toISOString().slice(0,10);
+const isMobile=()=>window.matchMedia('(max-width:920px)').matches;
+const uid=()=>Math.random().toString(36).slice(2,9);
+
+/* ---------- DEFAULT STATE (seeded) ---------- */
+const DEFAULT={
+  profile:{name:'Putt',taxYear:2026,salaryMonthly:140000,decBonus:140000,marBonusMonths:0,fxRate:33.2,apiKey:''},
+  prices:{TSM:185.20,AMZN:220.50,ASML:1020,MU:148,ThaiESG:14.20,RMF:18.6,BTC:3120000},
+  holdings:[
+    {id:'h1',ticker:'TSM',name:'Taiwan Semiconductor',type:'stock',broker:'IBKR',cur:'USD',units:42,avg:168.40,tax:false,signal:'Accumulate',earningsDate:'2026-07-17'},
+    {id:'h2',ticker:'AMZN',name:'Amazon',type:'stock',broker:'IBKR',cur:'USD',units:18,avg:198.10,tax:false,signal:'Hold',earningsDate:'2026-08-01'},
+    {id:'h3',ticker:'ASML',name:'ASML Holding',type:'stock',broker:'IBKR',cur:'USD',units:6,avg:880,tax:false,signal:'Hold',earningsDate:'2026-07-16'},
+    {id:'h4',ticker:'MU',name:'Micron',type:'stock',broker:'IBKR',cur:'USD',units:30,avg:118,tax:false,signal:'Accumulate',earningsDate:'2026-09-24'},
+    {id:'h5',ticker:'ThaiESG',name:'ThaiESG Fund',type:'fund',broker:'BBLAM',cur:'THB',units:12400,avg:12.80,tax:true,taxType:'ThaiESG',signal:'Hold',earningsDate:''},
+    {id:'h6',ticker:'RMF',name:'RMF Global Equity',type:'fund',broker:'KAsset',cur:'THB',units:9800,avg:16.40,tax:true,taxType:'RMF',signal:'Hold',earningsDate:''},
+    {id:'h7',ticker:'BTC',name:'Bitcoin',type:'crypto',broker:'Bitkub',cur:'THB',units:0.18,avg:2840000,tax:false,signal:'Trim',earningsDate:''}
+  ],
+  dca:[
+    {id:'d1',ticker:'TSM',amount:500,cur:'USD',freq:'monthly',day:23,start:'2025-06-23',end:'2027-12-23',auto:false,done:8,total:30},
+    {id:'d2',ticker:'ThaiESG',amount:5000,cur:'THB',freq:'monthly',day:1,start:'2025-01-01',end:'2026-12-01',auto:true,done:18,total:24},
+    {id:'d3',ticker:'RMF',amount:8000,cur:'THB',freq:'monthly',day:25,start:'2025-01-25',end:'2030-12-25',auto:true,done:18,total:72}
+  ],
+  dcaLog:[
+    {ticker:'TSM',date:'2026-05-23',price:178.40,amount:500,fxAtBuy:33.8,status:'Executed'},
+    {ticker:'TSM',date:'2026-04-23',price:162.10,amount:500,fxAtBuy:34.1,status:'Executed'},
+    {ticker:'ThaiESG',date:'2026-06-01',price:14.10,amount:5000,fxAtBuy:null,status:'Auto'}
+  ],
+  tx:[
+    {date:'2026-06-25',from:'KBank salary',to:'—',amount:1820000/12,type:'Salary in',dir:'in'},
+    {date:'2026-06-23',from:'KBank',to:'IBKR',amount:16600,type:'Investment transfer',dir:'move'},
+    {date:'2026-06-01',from:'KBank',to:'BBLAM',amount:5000,type:'Investment transfer',dir:'move'}
+  ],
+  fx:[{date:'Jan',rate:34.5},{date:'Feb',rate:34.1},{date:'Mar',rate:33.8},{date:'Apr',rate:33.6},{date:'May',rate:33.4},{date:'Jun',rate:33.2}],
+  rules:[
+    {cat:'port',desc:'MU drops >10% below avg cost while HBM contracts intact',act:'BUY',actc:'sp-g'},
+    {cat:'macro',desc:'ASML P/E exceeds 42× and AI-capex growth slows >2 quarters',act:'HOLD',actc:'sp-y'},
+    {cat:'fx',desc:'THB strengthens >5% vs USD from last buy rate → remittance window',act:'ALERT',actc:'sp-b'},
+    {cat:'dca',desc:'DCA end date within 60 days — wind-down check',act:'REVIEW',actc:'sp-y'},
+    {cat:'cal',desc:'Earnings report within 14 days for any held position',act:'WATCH',actc:'sp-b'},
+    {cat:'port',desc:'AI-capex sleeve concentration exceeds 75%',act:'TRIM',actc:'sp-r'}
+  ],
+  expenses:[
+    {date:'2026-06-22',merchant:'Villa Market',amount:1240,cat:'Food & dining',acct:'KBank CC',type:'Credit card'},
+    {date:'2026-06-20',merchant:'Grab',amount:280,cat:'Transport',acct:'KBank CC',type:'Credit card'},
+    {date:'2026-06-18',merchant:'Family transfer — parents',amount:20000,cat:'Family transfers',acct:'KBank',type:'Transfer'},
+    {date:'2026-06-15',merchant:'PEA electricity',amount:2100,cat:'Utilities & bills',acct:'KBank',type:'Recurring'},
+    {date:'2026-06-10',merchant:'Central Dept Store',amount:4500,cat:'Shopping',acct:'SCB CC',type:'Credit card'}
+  ],
+  subs:[
+    {name:'Netflix',amount:419,day:5,cat:'Entertainment'},
+    {name:'Spotify',amount:149,day:8,cat:'Entertainment'},
+    {name:'iCloud+',amount:99,day:12,cat:'Utilities & bills'},
+    {name:'Fitness First',amount:2500,day:1,cat:'Health & wellness'}
+  ],
+  accounts:[
+    {name:'KBank (main salary)',type:'Thai bank',bal:240000},
+    {name:'SCB (savings)',type:'Thai bank',bal:580000},
+    {name:'IBKR',type:'Broker',bal:0},
+    {name:'Bitkub',type:'Crypto',bal:0}
+  ],
+  tax:{
+    rental:0, foreignRemitted:0,
+    ded:{life:80000,health:25000,pvd:120000,mortgage:90000,donation:20000,spouse:0,child:0}
+  },
+  expTrend:[{m:'Jan',v:62000},{m:'Feb',v:58000},{m:'Mar',v:71000},{m:'Apr',v:55000},{m:'May',v:64000},{m:'Jun',v:28120}],
+  opportunities:[],
+  signalLog:[],
+  benchmarks:{spy:{ytd:0,yr12:0},urth:{ytd:0,yr12:0},set50:{ytd:0,yr12:0}},
+  taxLots:[],
+  growthHistory:[]
+};
+
+let S=load();
+// Deep-merge saved state onto a DEFAULT clone so any field added in a newer
+// version is back-filled for users with pre-upgrade localStorage. Arrays are
+// taken wholesale from saved (the user's real data); plain objects merge key-by-key.
+function mergeDefaults(def,saved){
+  if(Array.isArray(def)) return saved!==undefined?saved:structuredClone(def);
+  if(def&&typeof def==='object'){
+    const out={};const keys=new Set([...Object.keys(def),...Object.keys(saved&&typeof saved==='object'?saved:{})]);
+    for(const k of keys){
+      const sv=saved&&typeof saved==='object'?saved[k]:undefined;
+      out[k]=(k in def)?mergeDefaults(def[k],sv):sv;
+    }
+    return out;
+  }
+  return saved!==undefined?saved:def;
+}
+function load(){try{const s=localStorage.getItem(KEY);return s?mergeDefaults(DEFAULT,JSON.parse(s)):structuredClone(DEFAULT)}catch(e){return structuredClone(DEFAULT)}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){} if(CLOUD_ENABLED&&cloudUser){cloudPush();}else{setSync('Saved locally');}}
+function setSync(t){const el=document.getElementById('syncStatus');if(el)el.textContent=t;}
+
+/* ---------- CLOUD SYNC + AUTH (active only when Supabase keys are set) ---------- */
+function boot(){
+  if(CLOUD_ENABLED && window.supabase){
+    try{ sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY); initAuth(); return; }
+    catch(e){ console.warn('Supabase init failed — running in local mode.',e); }
+  }
+  // Local-only mode = original behaviour (no login screen)
+  renderAll();
+}
+async function initAuth(){
+  showAuthOverlay(false);
+  let session=null;
+  try{ session=(await sb.auth.getSession()).data.session; }catch(e){ console.warn(e); }
+  sb.auth.onAuthStateChange((_e,sess)=>handleSession(sess));
+  handleSession(session);
+}
+async function handleSession(session){
+  if(session&&session.user){
+    cloudUser=session.user;
+    updateAccountUI();
+    await cloudPull();      // cloud wins
+    renderAll();
+    showAuthOverlay(false);
+  }else{
+    cloudUser=null;
+    showAuthOverlay(true);
+  }
+}
+async function cloudPull(){
+  try{
+    const {data,error}=await sb.from('portfolio_state').select('data').eq('user_id',cloudUser.id).maybeSingle();
+    if(error) throw error;
+    if(data&&data.data){ S=mergeDefaults(DEFAULT,data.data); localStorage.setItem(KEY,JSON.stringify(S)); }
+    else { await cloudPush(true); }   // first login on this account — seed cloud from local
+  }catch(e){ console.warn('Cloud read failed — using local copy.',e); setSync('Offline — local copy'); }
+}
+function cloudPush(immediate){
+  if(!(CLOUD_ENABLED&&cloudUser&&sb)) return;
+  clearTimeout(cloudPushTimer);
+  const doPush=async()=>{
+    try{
+      setSync('Syncing…');
+      const {error}=await sb.from('portfolio_state').upsert({user_id:cloudUser.id,data:S,updated_at:new Date().toISOString()});
+      setSync(error?'Sync error — saved locally':'Synced ✓');
+      if(error) console.warn('Cloud write failed',error);
+    }catch(e){ setSync('Offline — saved locally'); console.warn(e); }
+  };
+  return immediate?doPush():(cloudPushTimer=setTimeout(doPush,1200));
+}
+async function sendMagicLink(){
+  const email=(document.getElementById('authEmail').value||'').trim();
+  if(!email||!/.+@.+\..+/.test(email)){ document.getElementById('authMsg').textContent='Enter a valid email address.'; return; }
+  const btn=document.getElementById('authBtn'); btn.disabled=true; btn.textContent='Sending…';
+  try{
+    const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:window.location.href.split('#')[0]}});
+    document.getElementById('authMsg').textContent=error?('Error: '+error.message):'✓ Check your email for the login link (look in spam too). You can close this once you click it.';
+  }catch(e){ document.getElementById('authMsg').textContent='Error: '+e.message; }
+  btn.disabled=false; btn.textContent='Send me a login link';
+}
+async function signOut(){ try{ await sb.auth.signOut(); }catch(e){} location.reload(); }
+function showAuthOverlay(show){ const o=document.getElementById('authOverlay'); if(o)o.classList.toggle('show',show); }
+function updateAccountUI(){
+  const box=document.getElementById('sbAccount'), em=document.getElementById('sbUserEmail');
+  if(box&&em&&cloudUser){ em.textContent=cloudUser.email||'Signed in'; box.style.display='block'; }
+}
+
+/* ---------- VALUATION ---------- */
+function priceOf(h){return S.prices[h.ticker]??h.avg}
+function valTHB(h){const p=priceOf(h);const v=p*h.units;return h.cur==='USD'?v*S.profile.fxRate:v}
+function costTHB(h){const v=h.avg*h.units;return h.cur==='USD'?v*S.profile.fxRate:v}
+function totalValue(){return S.holdings.reduce((s,h)=>s+valTHB(h),0)}
+function totalCost(){return S.holdings.reduce((s,h)=>s+costTHB(h),0)}
+function roiOf(h){return (priceOf(h)/h.avg-1)*100}
+
+/* ---------- TAX ENGINE (Thai 2026 bands) ---------- */
+const BANDS=[[150000,0],[150000,.05],[200000,.10],[250000,.15],[250000,.20],[1000000,.25],[3000000,.30],[Infinity,.35]];
+function taxOn(net){let t=0,rem=Math.max(0,net);for(const[w,r]of BANDS){const x=Math.min(rem,w);t+=x*r;rem-=x;if(rem<=0)break}return t}
+function marginalRate(net){let edge=0;for(const[w,r]of BANDS){edge+=w;if(net<=edge)return r}return .35}
+function employmentIncome(){return S.profile.salaryMonthly*12+S.profile.decBonus+S.profile.salaryMonthly*S.profile.marBonusMonths}
+function totalIncome(){return employmentIncome()+ (S.tax.rental||0) + (S.tax.foreignRemitted||0)}
+function rmfHeld(){return S.holdings.filter(h=>h.taxType==='RMF').reduce((s,h)=>s+valTHB(h),0)}
+function esgHeld(){return S.holdings.filter(h=>h.taxType==='ThaiESG').reduce((s,h)=>s+valTHB(h),0)}
+function deductions(){
+  const inc=totalIncome();
+  const rmf=Math.min(rmfHeld(),inc*.30,500000);
+  const esg=Math.min(esgHeld(),inc*.30,300000);
+  const d=S.tax.ded;
+  const lifeHealth=Math.min((d.life||0),100000)+Math.min((d.health||0),25000);
+  const pvd=Math.min((d.pvd||0),inc*.15,500000);
+  const personal=60000+(d.spouse||0)+(d.child||0);
+  return {
+    personal, rmf, esg,
+    life:Math.min(d.life||0,100000), health:Math.min(d.health||0,25000),
+    pvd, mortgage:Math.min(d.mortgage||0,100000),
+    donation:Math.min((d.donation||0),inc*.10),
+    total: personal+rmf+esg+Math.min(d.life||0,100000)+Math.min(d.health||0,25000)+pvd+Math.min(d.mortgage||0,100000)+Math.min((d.donation||0),inc*.10)
+  };
+}
+function netTaxable(){return Math.max(0,totalIncome()-deductions().total)}
+/* tax saved from investment-style deductions vs none */
+function taxSaved(){
+  const inc=totalIncome(); const D=deductions();
+  const investDed=D.rmf+D.esg+D.pvd+D.life+D.health;
+  const taxWith=taxOn(inc-D.total);
+  const taxWithout=taxOn(inc-(D.total-investDed));
+  return taxWithout-taxWith;
+}
+function taxSavedMax(){
+  const inc=totalIncome(); const D=deductions();
+  const maxInvest=Math.min(inc*.30,500000)+Math.min(inc*.30,300000)+Math.min(inc*.15,500000)+100000+25000;
+  const nonInvest=D.total-(D.rmf+D.esg+D.pvd+D.life+D.health);
+  const taxNow=taxOn(inc-D.total);
+  const taxMax=taxOn(inc-(nonInvest+maxInvest));
+  const taxBase=taxOn(inc-nonInvest);
+  return taxBase-taxMax;
+}
+
+/* ---------- SVG HELPERS ---------- */
+function lineChart(data,key,color,h=110){
+  const w=400,pad=6,vals=data.map(d=>d[key]),mn=Math.min(...vals),mx=Math.max(...vals),rng=(mx-mn)||1;
+  const pts=data.map((d,i)=>[pad+i*(w-2*pad)/(data.length-1),h-8-((d[key]-mn)/rng)*(h-24)]);
+  const path=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  const area=path+` L${pts[pts.length-1][0]},${h} L${pts[0][0]},${h} Z`;
+  const grid=[0,1,2,3].map(i=>`<line x1="0" y1="${8+i*(h-24)/3}" x2="${w}" y2="${8+i*(h-24)/3}" stroke="#F3F4F6" stroke-width="1"/>`).join('');
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="width:100%;height:${h}px">
+    ${grid}<path d="${area}" fill="${color}" opacity=".08"/>
+    <path d="${path}" fill="none" stroke="${color}" stroke-width="2"/>
+    <circle cx="${pts[pts.length-1][0]}" cy="${pts[pts.length-1][1]}" r="3.5" fill="${color}"/></svg>
+    <div style="display:flex;justify-content:space-between;margin-top:4px">${data.map(d=>`<span style="font-size:9.5px;color:var(--tx3)">${d[key+'_l']||d.m||d.date||''}</span>`).join('')}</div>`;
+}
+function donut(segs,centerTop,centerBot){
+  const C=2*Math.PI*40,total=segs.reduce((s,x)=>s+x.v,0)||1;let off=0;
+  const arcs=segs.map(s=>{const len=s.v/total*C;const a=`<circle cx="55" cy="55" r="40" fill="none" stroke="${s.c}" stroke-width="17" stroke-dasharray="${len.toFixed(1)} ${(C-len).toFixed(1)}" stroke-dashoffset="${(-off).toFixed(1)}"/>`;off+=len;return a}).join('');
+  return `<svg width="112" height="112" viewBox="0 0 110 110"><circle cx="55" cy="55" r="40" fill="none" stroke="#F3F4F6" stroke-width="17"/>${arcs}
+    <text x="55" y="51" text-anchor="middle" font-family="Inter" font-size="10" font-weight="600" fill="#111">${centerTop}</text>
+    <text x="55" y="65" text-anchor="middle" font-family="Inter" font-size="12" font-weight="700" fill="#111">${centerBot}</text></svg>`;
+}
+function multiLineChart(series,xLabels,h=130){
+  const w=400,pad=6;
+  const visible=series.filter(s=>s.points&&s.points.length);
+  const allVals=visible.flatMap(s=>s.points.map(p=>p.v));
+  const mn=Math.min(0,...allVals),mx=Math.max(...allVals,1),rng=(mx-mn)||1;
+  const n=Math.max(xLabels.length,2);
+  const xPos=i=>pad+i*(w-2*pad)/(n-1);
+  const grid=[0,1,2,3].map(i=>`<line x1="0" y1="${8+i*(h-24)/3}" x2="${w}" y2="${8+i*(h-24)/3}" stroke="#F3F4F6" stroke-width="1"/>`).join('');
+  const paths=visible.map(s=>{
+    const pts=s.points.map(p=>{const idx=xLabels.indexOf(p.x);return [xPos(idx>=0?idx:0),h-8-((p.v-mn)/rng)*(h-24)];});
+    const path=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+    const dots=pts.map((p,i)=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="6" fill="${s.color}" fill-opacity="0.01"><title>${s.label} · ${s.points[i].x}: ${fmtTHBk(s.points[i].v)}</title></circle>`).join('');
+    return `<path d="${path}" fill="none" stroke="${s.color}" stroke-width="2"${s.dashed?' stroke-dasharray="5,4"':''}/>${dots}<circle cx="${pts[pts.length-1][0]}" cy="${pts[pts.length-1][1]}" r="3.5" fill="${s.color}"/>`;
+  }).join('');
+  const legend=visible.map(s=>`<span style="display:inline-flex;align-items:center;gap:5px;margin-right:14px;font-size:10px;color:var(--tx2)"><span style="width:8px;height:8px;border-radius:50%;background:${s.color};display:inline-block${s.dashed?';opacity:.6':''}"></span>${s.label}</span>`).join('');
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="width:100%;height:${h}px">${grid}${paths}</svg>
+    <div style="display:flex;justify-content:space-between;margin-top:4px">${xLabels.map(x=>`<span style="font-size:9.5px;color:var(--tx3)">${x}</span>`).join('')}</div>
+    <div style="margin-top:8px">${legend}</div>`;
+}
+function barChart(items,color){
+  const mx=Math.max(...items.map(i=>i.v))||1;
+  return items.map(i=>`<div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--tx2)">${i.l}</span><span style="font-weight:600;color:var(--tx)">${fmtTHB(i.v)}</span></div><div class="bar"><i style="width:${i.v/mx*100}%;background:${color||'var(--lav2)'}"></i></div></div>`).join('');
+}
+function spark(color){return `<svg class="spark" viewBox="0 0 74 26" preserveAspectRatio="none"><path d="M0,20 C10,18 20,14 30,11 C40,8 50,10 62,5 C68,3 72,4 74,2" fill="none" stroke="${color}" stroke-width="1.5"/></svg>`}
+
+/* ---------- RENDERERS ---------- */
+const CATCOLORS={'Food & dining':'#A78BFA','Transport':'#6EE7B7','Shopping':'#FDE68A','Health & wellness':'#FBCFE8','Entertainment':'#BAE6FD','Travel':'#F0ABFC','Utilities & bills':'#93C5FD','Subscriptions':'#C4B5FD','Family transfers':'#FCA5A5','Investment transfers':'#86EFAC','Rent/mortgage':'#FDBA74','Other':'#D1D5DB'};
+const ALLOCCOLORS={stock:'#A78BFA',fund:'#6EE7B7',etf:'#FDE68A',crypto:'#FBCFE8',other:'#BAE6FD'};
+
+function renderDashboard(){
+  const tv=totalValue(),tc=totalCost(),pl=tv-tc,roi=tc?pl/tc*100:0;
+  const usd=tv/S.profile.fxRate;
+  const saved=taxSaved();
+  const mtd=S.expenses.filter(e=>e.date.slice(0,7)===todayISO().slice(0,7)).reduce((s,e)=>s+e.amount,0);
+  const nextDca=S.dca.map(d=>({...d})).sort((a,b)=>a.day-b.day)[0];
+  document.getElementById('heroSub').textContent=`${S.rules.length} rules armed · ${S.dca.length} DCA schedules · THB/USD ${S.profile.fxRate}`;
+  document.getElementById('kpis').innerHTML=`
+    <div class="kpi k1"><div class="kpi-top"><div class="kpi-ic">▦</div><div class="kpi-l">Total value</div></div><div class="kpi-v">${fmtTHBk(tv)}</div><div class="kpi-bot"><span class="kpi-tag pos">${pct(roi)} all-time</span>${spark('#A78BFA')}</div><div style="font-size:10px;color:#6B7280;margin-top:5px">${fmtUSD(usd)} USD · MWR ${(()=>{const m=portfolioMWR();return m!==null?(m>=0?'+':'')+m.toFixed(1)+'%/yr':'—'})()}</div></div>
+    <div class="kpi k2"><div class="kpi-top"><div class="kpi-ic">◎</div><div class="kpi-l">Unrealised P&L</div></div><div class="kpi-v">${pl>=0?'+':''}${fmtTHBk(pl)}</div><div class="kpi-bot"><span class="kpi-tag pos">vs ${fmtTHBk(tc)} in</span>${spark('#6EE7B7')}</div></div>
+    <div class="kpi k3"><div class="kpi-top"><div class="kpi-ic">⛨</div><div class="kpi-l">Tax saved YTD</div></div><div class="kpi-v">${fmtTHBk(saved)}</div><div class="kpi-bot"><span class="kpi-tag ambx">of ${fmtTHBk(taxSavedMax())} max</span>${spark('#FDE68A')}</div></div>
+    <div class="kpi k4"><div class="kpi-top"><div class="kpi-ic">▤</div><div class="kpi-l">Expenses MTD</div></div><div class="kpi-v">${fmtTHBk(mtd)}</div><div class="kpi-bot"><span class="kpi-tag" style="color:#BE185D">${nextDca?'DCA '+nextDca.ticker+' soon':''}</span>${spark('#FBCFE8')}</div><div style="font-size:10px;color:#6B7280;margin-top:5px">${(()=>{const bm=S.benchmarks||{spy:{ytd:0}};const pp=(tc?(tv-tc)/tc*100:0)-(bm.spy.ytd||0);return 'vs S&P: '+(pp>=0?'+':'')+pp.toFixed(1)+'pp'})()}</div></div>`;
+
+  const fired=evalSignals();
+  const firedPills=fired.slice(0,4).map(f=>`<span class="sp ${f.actc}">${f.act}·${f.ticker}</span>`).join('');
+  const bannerText=fired.length?`<b>${fired.length} signal${fired.length>1?'s':''} fired</b> — ${fired.slice(0,2).map(f=>f.desc).join(' · ')}${fired.length>2?' · …':''}`:'<b>All clear</b> — no rules triggered right now';
+  document.getElementById('signalBanner').innerHTML=`<span class="signal-t">${bannerText}</span><div class="pills">${firedPills}</div>`;
+
+  const typesPresent=[...new Set(S.holdings.map(h=>h.type))];
+  const scopeSel=document.getElementById('growthScopeSel');
+  if(scopeSel){
+    scopeSel.innerHTML=`<option value="total">Total Portfolio</option>`+
+      `<optgroup label="Asset Class">${typesPresent.map(t=>`<option value='${JSON.stringify({type:t})}'>${t[0].toUpperCase()+t.slice(1)}</option>`).join('')}</optgroup>`+
+      `<optgroup label="Holding">${S.holdings.map(h=>`<option value='${JSON.stringify({ticker:h.ticker})}'>${h.ticker}</option>`).join('')}</optgroup>`;
+    const curVal=growthScope==='total'?'total':JSON.stringify(growthScope);
+    [...scopeSel.options].forEach(o=>{if(o.value===curVal) o.selected=true;});
+  }
+  const benchLabel=document.getElementById('growthBenchLabel'),benchChk=document.getElementById('growthBenchChk');
+  if(benchLabel&&benchChk){
+    const enabled=growthScope==='total';
+    benchLabel.style.opacity=enabled?'1':'.4';benchLabel.style.pointerEvents=enabled?'auto':'none';
+    benchChk.disabled=!enabled;benchChk.checked=growthBenchOn&&enabled;
+  }
+  document.getElementById('growthRangePills').innerHTML=['1M','3M','6M','1Y','ALL'].map(r=>
+    `<button class="chip ${r===growthRange?'chip-g':'chip-n'}" style="border:none;cursor:pointer" onclick="setGrowthRange('${r}')">${r}</button>`).join('');
+  const gs=growthSeriesFor(growthScope,growthRange);
+  const series=[
+    {label:'Invested',color:'#9CA3AF',points:gs.invested},
+    {label:'Value',color:'#A78BFA',points:gs.value}
+  ];
+  if(gs.benchmark) series.push({label:'vs S&P 500',color:'#FB923C',dashed:true,points:gs.benchmark});
+  document.getElementById('growthChart').innerHTML=multiLineChart(series,gs.xLabels,130);
+  const allocSeg=Object.entries(S.holdings.reduce((a,h)=>{a[h.type]=(a[h.type]||0)+valTHB(h);return a},{})).map(([k,v])=>({k,v,c:ALLOCCOLORS[k]}));
+  document.getElementById('allocChart').innerHTML=`<div class="gauge-wrap" style="gap:16px"><div>${donut(allocSeg,'Total',fmtTHBk(tv))}</div><div class="donut-legend" style="flex:1">${allocSeg.map(s=>`<div class="dl-row"><span class="dl-dot" style="background:${s.c}"></span>${s.k[0].toUpperCase()+s.k.slice(1)}<span class="dl-pct">${fmtTHBk(s.v)} · ${Math.round(s.v/tv*100)}%</span></div>`).join('')}</div></div>`;
+
+  document.getElementById('taxMini').innerHTML=`<div class="mtile"><div class="v">${fmtTHBk(saved)}</div><div class="s pos">of ${fmtTHBk(taxSavedMax())} potential</div><div class="bar" style="margin-top:8px"><i style="width:${Math.min(100,saved/taxSavedMax()*100)}%"></i></div></div>`;
+  document.getElementById('expMini').innerHTML=`<div class="mtile"><div class="v">${fmtTHB(mtd)}</div><div class="s" style="color:var(--tx2)">${S.expenses.filter(e=>e.date.slice(0,7)===todayISO().slice(0,7)).length} transactions this month</div></div>`;
+  document.getElementById('dcaMini').innerHTML=nextDca?`<div class="mtile"><div class="v">${nextDca.ticker}</div><div class="s" style="color:var(--tx2)">${nextDca.cur==='USD'?'$'+nextDca.amount:fmtTHB(nextDca.amount)} · day ${nextDca.day} ${nextDca.auto?'· auto':''}</div></div>`:'<div class="empty">No schedules</div>';
+
+  const bm=S.benchmarks||{spy:{ytd:0,yr12:0},urth:{ytd:0,yr12:0},set50:{ytd:0,yr12:0}};
+  const portYtd=tc?(tv-tc)/tc*100:0;
+  const bmRows=[['S&P 500 (SPY)',bm.spy.ytd||0],['MSCI World (URTH)',bm.urth.ytd||0],['SET50 (Thailand)',bm.set50.ytd||0]];
+  const anyBench=bmRows.some(r=>r[1]!==0);
+  document.getElementById('benchCard').innerHTML=anyBench
+    ?bmRows.map(([name,bench])=>{const pp=portYtd-bench;const barW=Math.min(100,Math.max(0,(portYtd+30)*1.5));const bmW=Math.min(100,Math.max(0,(bench+30)*1.5));return `<div style="margin-bottom:11px"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px"><span style="color:var(--tx2)">${name} (bench ${bench>=0?'+':''}${bench.toFixed(1)}%)</span><span style="font-weight:600;color:${pp>=0?'var(--grn)':'var(--red)'}">${pp>=0?'+':''}${pp.toFixed(1)} pp</span></div><div style="position:relative;height:7px;background:var(--line2);border-radius:5px;overflow:hidden"><div style="position:absolute;height:100%;border-radius:5px;background:${pp>=0?'var(--mint2)':'var(--blush2)'};width:${barW}%"></div></div></div>`}).join('')
+    :'<div style="font-size:11.5px;color:var(--tx3);padding:6px 0">No benchmark data yet — add returns in <b>Settings → Benchmark returns</b></div>';
+  document.getElementById('holdCount').textContent=S.holdings.length+' positions';
+  document.getElementById('dashHoldings').innerHTML=holdRows(S.holdings.slice(0,6));
+}
+function holdRows(list){
+  if(isMobile()){
+    return `<div class="m-card-list">`+list.map(h=>{
+      const v=valTHB(h),roi=roiOf(h),w=v/totalValue()*100;const sc=h.signal==='Accumulate'?'chip-g':h.signal==='Trim'?'chip-r':'chip-y';
+      return `<div class="m-card"><div class="m-card-top"><div><div class="m-card-name">${h.ticker} <span class="badge bd-${h.type}">${h.type}</span></div><div class="m-card-sub">${h.broker} · ${h.cur}</div></div><div class="m-card-val"><div class="mono">${fmtTHBk(v)}</div><div class="mono ${roi>=0?'pos':'neg'}" style="font-size:11px">${pct(roi)}</div></div></div><div class="m-card-grid"><div><span>Weight</span><b>${w.toFixed(0)}%</b></div><div><span>Signal</span><b><span class="chip ${sc}">${h.signal}</span></b></div></div></div>`;
+    }).join('')+'</div>';
+  }
+  return `<table class="tbl"><thead><tr><th>Asset</th><th>Type</th><th>Value (฿)</th><th>ROI</th><th>Weight</th><th>Signal</th></tr></thead><tbody>`+
+  list.map(h=>{const v=valTHB(h),roi=roiOf(h),w=v/totalValue()*100;const sc=h.signal==='Accumulate'?'chip-g':h.signal==='Trim'?'chip-r':'chip-y';
+    return `<tr><td class="name">${h.ticker}<div style="font-size:9.5px;color:var(--tx3);font-weight:400">${h.broker} · ${h.cur}</div></td><td><span class="badge bd-${h.type}">${h.type}</span></td><td class="mono">${fmtTHBk(v)}</td><td class="mono ${roi>=0?'pos':'neg'}">${pct(roi)}</td><td class="mono">${w.toFixed(0)}%</td><td><span class="chip ${sc}">${h.signal}</span></td></tr>`}).join('')+'</tbody></table>';
+}
+
+function renderHoldings(){
+  document.getElementById('holdSub').textContent=`${S.holdings.length} positions · ${fmtTHBk(totalValue())} total`;
+  if(isMobile()){
+    document.getElementById('holdingsTbl').innerHTML=`<div class="m-card-list">`+S.holdings.map(h=>{
+      const roi=roiOf(h);const ann=annReturn(h);const mwr=mwrOf(h);
+      const mwrLogs=S.dcaLog.filter(l=>l.ticker===h.ticker);
+      const mwrTxt=mwr!==null?(mwr>=0?'+':'')+mwr.toFixed(1)+'%/yr':mwrLogs.length?'—':'simple';
+      const today=new Date();const eDate=h.earningsDate?new Date(h.earningsDate):null;
+      const daysE=eDate?Math.round((eDate-today)/(1000*60*60*24)):null;
+      const eTxt=daysE!==null&&daysE>=0&&daysE<=14?`${daysE}d`:daysE!==null&&daysE>14?h.earningsDate.slice(5):'—';
+      const lotsCount=(S.taxLots||[]).filter(l=>l.ticker===h.ticker).length;
+      return `<div class="m-card" id="hrow-${h.id}"><div class="m-card-top"><div><div class="m-card-name">${h.ticker} <span class="badge bd-${h.type}">${h.type}</span></div><div class="m-card-sub">${h.name} · ${h.broker} · ${h.cur}</div></div><div class="m-card-val"><div class="mono">${fmtTHBk(valTHB(h))}</div><div class="mono ${roi>=0?'pos':'neg'}" style="font-size:11px">${pct(roi)}</div></div></div>
+      <div class="m-card-grid"><div><span>Units</span><b>${h.units}</b></div><div><span>Avg cost</span><b>${h.cur==='USD'?'$'+h.avg.toFixed(2):fmtTHB(h.avg)}</b></div><div><span>Price</span><b>${h.cur==='USD'?'$'+priceOf(h):fmtTHB(priceOf(h))}</b></div><div><span>Ann. return</span><b class="${ann>=0?'pos':'neg'}">${pct(ann)}/yr</b></div><div><span>MWR</span><b>${mwrTxt}</b></div><div><span>Earnings</span><b>${eTxt}</b></div></div>
+      <div class="m-card-tags">${h.tax?`<span class="chip chip-g">${h.taxType}</span>`:''}</div>
+      <div class="m-card-actions"><button class="btn-ghost btn-sm" onclick="askAnalyst('${h.ticker}')">Ask</button><button class="btn-ghost btn-sm" onclick="editHolding('${h.id}')">Edit</button><button class="btn-ghost btn-sm" onclick="toggleLots('${h.id}')">Lots${lotsCount?` (${lotsCount})`:''}</button></div></div>`;
+    }).join('')+'</div>';
+    return;
+  }
+  document.getElementById('holdingsTbl').innerHTML=`<table class="tbl"><thead><tr><th>Asset</th><th>Type</th><th>Platform</th><th>Units</th><th>Avg cost</th><th>Price</th><th>Value ฿</th><th>ROI</th><th>Ann. return</th><th>MWR/yr</th><th>Earnings</th><th>Tax</th><th></th></tr></thead><tbody>`+
+  S.holdings.map(h=>{
+    const roi=roiOf(h);const ann=annReturn(h);
+    const mwr=mwrOf(h);
+    const mwrLogs=S.dcaLog.filter(l=>l.ticker===h.ticker);
+    const mwrCell=mwr!==null?`<span class="mono ${mwr>=0?'pos':'neg'}">${(mwr>=0?'+':'')+mwr.toFixed(1)}%/yr</span>`:mwrLogs.length?'<span style="color:var(--tx3)">—</span>':'<span style="color:var(--tx3);font-size:9px">simple</span>';
+    const today=new Date();const eDate=h.earningsDate?new Date(h.earningsDate):null;
+    const daysE=eDate?Math.round((eDate-today)/(1000*60*60*24)):null;
+    const eChip=daysE!==null&&daysE>=0&&daysE<=14?`<span class="chip chip-r" style="font-size:9px">${daysE}d</span>`:daysE!==null&&daysE>14?`<span style="font-size:10px;color:var(--tx3)">${h.earningsDate.slice(5)}</span>`:'—';
+    const lotsCount=(S.taxLots||[]).filter(l=>l.ticker===h.ticker).length;
+    return `<tr id="hrow-${h.id}"><td class="name">${h.ticker}<div style="font-size:9.5px;color:var(--tx3);font-weight:400">${h.name}</div></td><td><span class="badge bd-${h.type}">${h.type}</span></td><td>${h.broker}</td><td class="mono">${h.units}</td><td class="mono">${h.cur==='USD'?'$'+h.avg.toFixed(2):fmtTHB(h.avg)}</td><td class="mono">${h.cur==='USD'?'$'+priceOf(h):fmtTHB(priceOf(h))}</td><td class="mono">${fmtTHBk(valTHB(h))}</td><td class="mono ${roi>=0?'pos':'neg'}">${pct(roi)}</td><td class="mono ${ann>=0?'pos':'neg'}">${pct(ann)}/yr</td><td>${mwrCell}</td><td>${eChip}</td><td>${h.tax?`<span class="chip chip-g">${h.taxType}</span>`:'<span class="chip chip-n">—</span>'}</td><td style="white-space:nowrap"><button class="btn-ghost btn-sm" onclick="askAnalyst('${h.ticker}')">Ask</button> <button class="btn-ghost btn-sm" onclick="editHolding('${h.id}')">Edit</button> <button class="btn-ghost btn-sm" onclick="toggleLots('${h.id}')" title="${lotsCount} lot${lotsCount!==1?'s':''} tracked">Lots${lotsCount?` (${lotsCount})`:''}</button></td></tr>`;
+  }).join('')+'</tbody></table>';
+}
+
+function renderDCA(){
+  document.getElementById('dcaSub').textContent=`${S.dca.length} active · ${S.dca.filter(d=>d.auto).length} auto-running`;
+  document.getElementById('dcaList').innerHTML=S.dca.map(d=>{
+    const prog=Math.round(d.done/d.total*100);const log=S.dcaLog.filter(l=>l.ticker===d.ticker).slice(0,3);
+    const endSoon=d.done/d.total>0.7;
+    return `<div class="card mb14"><div class="row-between" style="margin-bottom:10px"><div style="display:flex;align-items:center;gap:9px"><span style="font-family:var(--mono);font-weight:700;font-size:13px">${d.ticker}</span>${d.auto?'<span class="chip chip-g">Auto DCA</span>':'<span class="chip chip-r">Manual</span>'}</div><button class="btn ${d.auto?'btn-ghost':''} btn-sm" onclick="execDCA('${d.id}')">${d.auto?'Override':'Mark executed'}</button></div>
+    <div class="grid3" style="gap:10px;margin-bottom:10px"><div class="mtile"><div class="l">Amount</div><div class="v" style="font-size:15px">${d.cur==='USD'?'$'+d.amount:fmtTHB(d.amount)}</div></div><div class="mtile"><div class="l">Schedule</div><div class="v" style="font-size:15px">Day ${d.day} ${d.freq}</div></div><div class="mtile"><div class="l">Progress</div><div class="v" style="font-size:15px">${d.done}/${d.total}</div></div></div>
+    <div class="bar"><i style="width:${prog}%"></i></div>
+    <div style="display:flex;justify-content:space-between;font-size:9.5px;color:var(--tx3);margin-top:4px"><span>${d.start}</span><span>${prog}% complete</span><span ${endSoon?'style="color:var(--amb);font-weight:600"':''}>${endSoon?'⚠ ':''}ends ${d.end}</span></div>
+    ${log.length?`<div style="margin-top:10px;border-top:1px solid var(--line2);padding-top:8px"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);margin-bottom:5px;font-family:var(--mono)">Entry price log</div>${log.map(l=>`<div style="display:flex;gap:14px;font-size:11px;padding:2px 0"><span style="color:var(--tx3);font-family:var(--mono);width:80px">${l.date}</span><span style="font-family:var(--mono);font-weight:700">${d.cur==='USD'?'$'+l.price:fmtTHB(l.price)}</span><span style="color:var(--tx3)">${l.status}</span></div>`).join('')}</div>`:''}</div>`;
+  }).join('');
+}
+
+function renderTx(){
+  const inAmt=S.tx.filter(t=>t.dir==='in').reduce((s,t)=>s+t.amount,0);
+  const moveAmt=S.tx.filter(t=>t.dir==='move').reduce((s,t)=>s+t.amount,0);
+  const outAmt=S.expenses.filter(e=>e.date.slice(0,7)===todayISO().slice(0,7)).reduce((s,e)=>s+e.amount,0);
+  document.getElementById('txKpis').innerHTML=`
+    <div class="card"><div class="mtile"><div class="l">Income in (mo)</div><div class="v pos">${fmtTHB(inAmt)}</div></div></div>
+    <div class="card"><div class="mtile"><div class="l">To investments</div><div class="v" style="color:var(--lav-d)">${fmtTHB(moveAmt)}</div></div></div>
+    <div class="card"><div class="mtile"><div class="l">Investable cash left</div><div class="v ambx">${fmtTHB(Math.max(0,inAmt-moveAmt-outAmt))}</div></div></div>`;
+  if(isMobile()){
+    document.getElementById('txTbl').innerHTML=`<div class="m-card-list">`+S.tx.map(t=>
+      `<div class="m-card"><div class="m-card-top"><div><div class="m-card-name">${t.from}${t.to&&t.to!=='—'?' → '+t.to:''}</div><div class="m-card-sub">${t.date}</div></div><div class="m-card-val"><div class="mono">${fmtTHB(t.amount)}</div></div></div><div class="m-card-tags"><span class="chip ${t.dir==='in'?'chip-g':t.dir==='move'?'chip-b':'chip-n'}">${t.type}</span>${t.auto?'<span class="chip chip-g">auto</span>':''}</div></div>`
+    ).join('')+'</div>';
+    return;
+  }
+  document.getElementById('txTbl').innerHTML=`<table class="tbl"><thead><tr><th>Date</th><th>From</th><th>To</th><th>Type</th><th>Amount</th></tr></thead><tbody>`+
+  S.tx.map(t=>`<tr><td class="mono">${t.date}</td><td class="name">${t.from}</td><td>${t.to}</td><td><span class="chip ${t.dir==='in'?'chip-g':t.dir==='move'?'chip-b':'chip-n'}">${t.type}</span>${t.auto?'<span class="chip chip-g" style="font-size:8px;margin-left:4px;padding:1px 5px">auto</span>':''}</td><td class="mono">${fmtTHB(t.amount)}</td></tr>`).join('')+'</tbody></table>';
+}
+
+function renderFX(){
+  document.getElementById('fxNow').textContent='now '+S.profile.fxRate;
+  document.getElementById('fxChart').innerHTML=lineChart(S.fx,'rate','#A78BFA',120);
+  const usdH=S.holdings.filter(h=>h.cur==='USD');
+  document.getElementById('fxSplit').innerHTML=usdH.map(h=>{const assetG=roiOf(h);const buyFx=34.5;const fxG=(S.profile.fxRate/buyFx-1)*100;return `<div style="margin-bottom:11px"><div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:4px"><b>${h.ticker}</b><span class="mono">total ${pct(assetG+fxG)}</span></div><div style="display:flex;gap:6px"><div style="flex:1"><div style="font-size:9.5px;color:var(--tx3)">asset</div><div class="mono ${assetG>=0?'pos':'neg'}" style="font-size:12px;font-weight:600">${pct(assetG)}</div></div><div style="flex:1"><div style="font-size:9.5px;color:var(--tx3)">FX (THB)</div><div class="mono ${fxG>=0?'pos':'neg'}" style="font-size:12px;font-weight:600">${pct(fxG)}</div></div></div></div>`}).join('');
+  document.getElementById('remit').innerHTML=`<div class="note">Baht has strengthened from ~34.5 to ${S.profile.fxRate} this year — remitting foreign gains <b>now</b> yields fewer THB but post-2024 rules tax remitted foreign income in the year received. If you don't need the cash in Thailand this year, deferring remittance to a lower-income year can reduce the marginal rate applied. Tell me your planned remittance and I'll model both years.</div>`;
+}
+
+function renderTax(){
+  const inc=totalIncome(),D=deductions(),net=netTaxable(),tax=taxOn(net),eff=inc?tax/inc*100:0,marg=marginalRate(net)*100;
+  const saved=taxSaved(),maxS=taxSavedMax();
+  document.getElementById('taxKpis').innerHTML=`
+    <div class="card"><div class="mtile"><div class="l">Taxable income</div><div class="v">${fmtTHBk(net)}</div><div class="s" style="color:var(--tx2)">from ${fmtTHBk(inc)} gross</div></div></div>
+    <div class="card"><div class="mtile"><div class="l">Estimated tax</div><div class="v">${fmtTHBk(tax)}</div><div class="s" style="color:var(--tx2)">effective ${eff.toFixed(1)}% · marginal ${marg.toFixed(0)}%</div></div></div>
+    <div class="card"><div class="mtile"><div class="l">Tax saved by investing</div><div class="v pos">${fmtTHBk(saved)}</div><div class="s ambx">of ${fmtTHBk(maxS)} possible</div></div></div>`;
+  const caps={personal:'auto',rmf:Math.min(inc*.30,500000),esg:Math.min(inc*.30,300000),life:100000,health:25000,pvd:Math.min(inc*.15,500000),mortgage:100000,donation:inc*.10};
+  const rows=[['Personal & family','allowances',D.personal,caps.personal],['RMF','30% inc, max ฿500k',D.rmf,caps.rmf],['ThaiESG','30% inc, max ฿300k',D.esg,caps.esg],['PVD','15% inc, max ฿500k',D.pvd,caps.pvd],['Life insurance','max ฿100k',D.life,caps.life],['Health insurance','max ฿25k',D.health,caps.health],['Mortgage interest','max ฿100k',D.mortgage,caps.mortgage],['Donations','max 10% inc',D.donation,caps.donation]];
+  document.getElementById('dedTracker').innerHTML=rows.map(r=>{const cap=r[3]==='auto'?r[2]:r[3];const fill=cap?Math.min(100,r[2]/cap*100):100;return `<div class="deduction-row"><div class="ded-name">${r[0]}<small>${r[1]}</small></div><div class="bar"><i style="width:${fill}%"></i></div><div class="ded-amt"><b>${fmtTHBk(r[2])}</b><span> / ${r[3]==='auto'?'—':fmtTHBk(cap)}</span></div></div>`}).join('');
+  const gp=Math.min(100,saved/maxS*100);
+  document.getElementById('taxGauge').innerHTML=`<div style="text-align:center;padding:6px 0">${donut([{v:saved,c:'#6EE7B7'},{v:Math.max(0,maxS-saved),c:'#F3F4F6'}],'saved',fmtTHBk(saved))}<div style="margin-top:8px;font-size:11px;color:var(--tx2)">You've captured <b style="color:var(--grn)">${gp.toFixed(0)}%</b> of your maximum tax savings.</div><div style="font-size:10.5px;color:var(--tx3);margin-top:4px">Headroom: ${fmtTHBk(maxS-saved)} more available at your 25% marginal rate.</div></div>`;
+  document.getElementById('incomeBox').innerHTML=`<div class="deduction-row"><div class="ded-name">Salary (×12)</div><div></div><div class="ded-amt"><b>${fmtTHBk(S.profile.salaryMonthly*12)}</b></div></div><div class="deduction-row"><div class="ded-name">December bonus</div><div></div><div class="ded-amt"><b>${fmtTHBk(S.profile.decBonus)}</b></div></div><div class="deduction-row"><div class="ded-name">March variable bonus<small>${S.profile.marBonusMonths} months this year</small></div><div></div><div class="ded-amt"><b>${fmtTHBk(S.profile.salaryMonthly*S.profile.marBonusMonths)}</b></div></div><div class="deduction-row"><div class="ded-name">Rental income</div><div></div><div class="ded-amt"><b>${fmtTHBk(S.tax.rental||0)}</b></div></div><div class="deduction-row"><div class="ded-name">Foreign income remitted</div><div></div><div class="ded-amt"><b>${fmtTHBk(S.tax.foreignRemitted||0)}</b></div></div><div class="deduction-row" style="border-top:2px solid var(--line)"><div class="ded-name"><b>Total income</b></div><div></div><div class="ded-amt"><b style="color:var(--lav-d)">${fmtTHBk(inc)}</b></div></div>`;
+  let cum=0,bandsOut='';const bnames=['0–150k','150–300k','300–500k','500–750k','750k–1M','1–2M','2–5M','5M+'];
+  let rem=net;for(let i=0;i<BANDS.length;i++){const[w,r]=BANDS[i];const x=Math.min(rem,w);if(x<=0)break;const t=x*r;cum+=t;bandsOut+=`<div class="deduction-row"><div class="ded-name">${bnames[i]} @ ${(r*100)}%</div><div></div><div class="ded-amt"><b>${fmtTHBk(t)}</b></div></div>`;rem-=x}
+  document.getElementById('taxComp').innerHTML=bandsOut+`<div class="deduction-row" style="border-top:2px solid var(--line)"><div class="ded-name"><b>Total tax</b></div><div></div><div class="ded-amt"><b style="color:var(--lav-d)">${fmtTHBk(tax)}</b></div></div>`;
+  document.getElementById('taxRemit').innerHTML=`<div class="note">You file as multiple-income (salary + rental + foreign investment). For foreign gains: remitting in a high-income year stacks on your 25% marginal band; deferring to a lighter year (e.g. no March bonus, like this year) can drop the rate. Enter a planned remittance amount in Settings and I'll show the THB tax in 2026 vs 2027 side by side.</div>`;
+}
+
+function renderExpenses(){
+  const mo=todayISO().slice(0,7);
+  const mtdList=S.expenses.filter(e=>e.date.slice(0,7)===mo);
+  const mtd=mtdList.reduce((s,e)=>s+e.amount,0);
+  const subTotal=S.subs.reduce((s,x)=>s+x.amount,0);
+  const income=employmentIncome()/12;
+  const savRate=income?Math.max(0,(income-mtd)/income*100):0;
+  document.getElementById('expKpis').innerHTML=`
+    <div class="card"><div class="mtile"><div class="l">Spent MTD</div><div class="v">${fmtTHB(mtd)}</div><div class="s" style="color:var(--tx2)">${mtdList.length} transactions</div></div></div>
+    <div class="card"><div class="mtile"><div class="l">Subscriptions / mo</div><div class="v" style="color:var(--lav-d)">${fmtTHB(subTotal)}</div><div class="s" style="color:var(--tx2)">${S.subs.length} active</div></div></div>
+    <div class="card"><div class="mtile"><div class="l">Savings rate (est)</div><div class="v pos">${savRate.toFixed(0)}%</div><div class="s" style="color:var(--tx2)">of monthly income</div></div></div>`;
+  const byCat=Object.entries(mtdList.reduce((a,e)=>{a[e.cat]=(a[e.cat]||0)+e.amount;return a},{})).map(([l,v])=>({l,v})).sort((a,b)=>b.v-a.v);
+  document.getElementById('expByCat').innerHTML=byCat.length?barChart(byCat.map(c=>({l:c.l,v:c.v})),null):'<div class="empty">No expenses this month</div>';
+  document.getElementById('expTrend').innerHTML=lineChart(S.expTrend,'v','#FBCFE8',120);
+  if(isMobile()){
+    document.getElementById('expTbl').innerHTML=`<div class="m-card-list">`+S.expenses.slice(0,8).map(e=>
+      `<div class="m-card"><div class="m-card-top"><div><div class="m-card-name">${e.merchant}</div><div class="m-card-sub">${e.date.slice(5)} · ${e.acct}</div></div><div class="m-card-val"><div class="mono">${fmtTHB(e.amount)}</div></div></div><div class="m-card-tags"><span class="chip" style="background:${(CATCOLORS[e.cat]||'#eee')}33;color:#444">${e.cat}</span></div></div>`
+    ).join('')+'</div>';
+  }else{
+    document.getElementById('expTbl').innerHTML=`<table class="tbl"><thead><tr><th>Date</th><th>Merchant</th><th>Category</th><th>Account</th><th>Amount</th></tr></thead><tbody>`+
+    S.expenses.slice(0,8).map(e=>`<tr><td class="mono">${e.date.slice(5)}</td><td class="name">${e.merchant}</td><td><span class="chip" style="background:${(CATCOLORS[e.cat]||'#eee')}33;color:#444">${e.cat}</span></td><td>${e.acct}</td><td class="mono">${fmtTHB(e.amount)}</td></tr>`).join('')+'</tbody></table>';
+  }
+  document.getElementById('subsList').innerHTML=S.subs.map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid var(--line2)"><div><div style="font-size:11.5px;font-weight:600">${s.name}</div><div style="font-size:9.5px;color:var(--tx3)">day ${s.day} · ${s.cat}</div></div><div class="mono" style="font-size:12px;font-weight:600">${fmtTHB(s.amount)}</div></div>`).join('');
+  document.getElementById('accList').innerHTML=`<div class="grid2" style="gap:10px">`+S.accounts.map((a,i)=>`<div class="mtile" style="display:flex;justify-content:space-between;align-items:center"><div><div class="l">${a.name}</div><div class="v">${fmtTHBk(a.bal)}</div><div class="s" style="color:var(--tx3)">${a.type}</div></div><button class="btn-ghost btn-sm" onclick="editAccount(${i})">Edit</button></div>`).join('')+'</div>';
+}
+
+const PERSONAS=[{id:'marcus',name:'Marcus',role:'Fund Manager',c:'#A78BFA',desc:'Portfolio-level view. Rebalance calls, macro stance, thesis review, risk-adjusted returns.'},{id:'aria',name:'Aria',role:'Research Analyst',c:'#6EE7B7',desc:'Per-position deep dives. Earnings analysis, buy/trim rationale, sector context.'},{id:'leo',name:'Leo',role:'Scout',c:'#FBCFE8',desc:'Scans for opportunities — new stocks, funds, crypto, ETFs aligned to your risk profile.'}];
+let activeDesk='marcus';
+let growthScope='total';
+let growthRange='6M';
+let growthBenchOn=false;
+function setGrowthScope(v){growthScope=v==='total'?'total':JSON.parse(v);renderDashboard();}
+function setGrowthRange(r){growthRange=r;renderDashboard();}
+function toggleGrowthBench(){growthBenchOn=!growthBenchOn;renderDashboard();}
+function renderAI(){
+  document.getElementById('personas').innerHTML=PERSONAS.map(p=>`<div class="persona ${p.id===activeDesk?'on':''}" onclick="setDesk('${p.id}')"><div class="persona-av" style="background:${p.c}">${p.name[0]}</div><div class="persona-name">${p.name}</div><div class="persona-role">${p.role}</div><div class="persona-desc">${p.desc}</div></div>`).join('');
+  const p=PERSONAS.find(x=>x.id===activeDesk);
+  const tv=totalValue();
+  const brief=activeDesk==='marcus'?`Morning. Portfolio at ${fmtTHBk(tv)}, up ${pct((tv/totalCost()-1)*100)} all-time. Your AI-capex names (TSM, AMZN, ASML, MU) are still the dominant factor — watch concentration. MU's buy trigger is live. What would you like to review — rebalance, thesis, or macro?`:activeDesk==='aria'?`Pick a position from Holdings and hit "Ask" — I'll pull the latest quarter, valuation, and your buy/kill triggers and give you a verdict with rationale.`:`Ready to scan. I look across stocks, funds, ETFs and crypto for ideas that fit your aggressive, medium-long profile — and flag anything that diversifies away from your AI-capex concentration. Hit "Scan now" or ask me here.`;
+  const apiNotice=S.profile.apiKey?'':`<div style="font-size:10.5px;color:#5B21B6;margin-bottom:10px;padding:7px 10px;background:var(--lav);border-radius:6px">Add your Anthropic API key in <b>Settings</b> to enable live in-page AI responses.</div>`;
+  document.getElementById('aiChat').innerHTML=`<div class="chatbox">${apiNotice}<div class="chat-msg"><div class="chat-from" style="color:${p.c==='#FBCFE8'?'#BE185D':p.c==='#6EE7B7'?'#047857':'#6D28D9'}">${p.name} · ${p.role}</div><div class="chat-bubble ai" id="aiResponse">${brief}</div></div><div class="chat-input-row"><input class="chat-input" id="aiInput" placeholder="Ask ${p.name}…" onkeydown="if(event.key==='Enter')askDesk()"><button class="btn" onclick="askDesk()">Send</button></div></div>`;
+}
+function setDesk(id){activeDesk=id;renderAI()}
+function askDesk(){
+  const v=document.getElementById('aiInput').value.trim();
+  if(!v) return;
+  if(S.profile.apiKey){
+    callClaudeAPI(activeDesk,v);
+  } else {
+    sendToChat(`[AI Desk · ${PERSONAS.find(p=>p.id===activeDesk).name} the ${PERSONAS.find(p=>p.id===activeDesk).role}] ${v}`);
+  }
+}
+
+function renderRules(){
+  const names={port:'Portfolio',macro:'Macro',fx:'FX',dca:'DCA',cal:'Calendar'};
+  document.getElementById('rulesList').innerHTML=S.rules.map((r,i)=>`<div class="rule-row"><span class="rt rt-${r.cat}">${names[r.cat]}</span><span class="rule-desc">${r.desc}</span><span class="rule-act ${r.actc}">${r.act}</span><button class="btn-ghost btn-sm" onclick="delRule(${i})">✕</button></div>`).join('');
+}
+function renderScout(){
+  if(!S.opportunities||!S.opportunities.length){document.getElementById('scoutList').innerHTML=`<div class="card"><div class="empty">No scans yet. Hit "Scan now" and I'll search across asset classes for opportunities that fit your profile and bring back a ranked shortlist with rationale.</div></div>`;return}
+  document.getElementById('scoutList').innerHTML=S.opportunities.map(o=>`<div class="card mb14"><div class="row-between"><div><b>${o.name}</b> <span class="badge bd-${o.type}">${o.type}</span></div><span class="chip chip-g">${o.fit}</span></div><p style="font-size:12px;color:var(--tx2);margin-top:8px">${o.thesis}</p></div>`).join('');
+}
+
+const TUT=[
+  {n:'CH 01',t:'Setup & first position',d:'Add a holding, set broker, cost basis, currency, tax flag.',body:`<h3>Adding your first position</h3><p>Open <code>Holdings → + Add position</code>, or just tell me in chat: <code>"bought 10 TSMC at $185 via IBKR"</code>. I'll log units, average cost, broker and currency, then push it to your Google Sheet.</p><p>Flag funds like RMF or ThaiESG as tax-advantaged — they automatically feed the Tax Centre's deduction tracker.</p>`},
+  {n:'CH 02',t:'DCA workflows',d:'Manual vs auto-DCA, entry price logging, overrides.',body:`<h3>DCA the way you actually invest</h3><p>Each schedule has a frequency, day, amount, start and end date. Flag a schedule <code>Auto</code> and it advances on its own — you only step in to <code>Override</code>. Manual schedules wait for you to <code>Mark executed</code>, where you log the real entry price.</p><p>Tell me <code>"executed TSM DCA at $182 today"</code> and I'll log the entry and advance the schedule.</p>`},
+  {n:'CH 03',t:'Telling me about money',d:'Trades, expenses, transfers — captured by chat.',body:`<h3>Chat is the fastest input</h3><p><b>Trades:</b> "bought 0.02 BTC at ฿3.1M on Bitkub".<br><b>Expenses:</b> throw a credit-card slip photo, or say "paid 1,240 at Villa Market".<br><b>Transfers:</b> "moved 16,600 from KBank to IBKR".</p><p>I extract the details, categorise, update the tool and sync the relevant Sheet tab.</p>`},
+  {n:'CH 04',t:'Tax Centre',d:'Income, deductions, the dynamic calculator & savings gauge.',body:`<h3>Your tax, live</h3><p>The Tax Centre takes your 2026 income (฿1.82M salary + bonus, plus rental and remitted foreign income you enter), subtracts your deductions, and runs the Thai progressive bands to show estimated tax, effective and marginal rates.</p><p>The savings gauge shows how much of your maximum possible tax saving you've captured through RMF, ThaiESG, PVD and insurance — and the headroom left at your 25% marginal rate.</p>`},
+  {n:'CH 05',t:'Expenses & savings',d:'MTD dashboard, categories, subscriptions, accounts.',body:`<h3>Spending that manages itself</h3><p>Every expense is categorised and rolled into the month-to-date dashboard, by-category breakdown, and 6-month trend. Subscriptions are tracked separately with renewal days. Account balances show where your money sits across KBank, SCB, IBKR and Bitkub.</p>`},
+  {n:'CH 06',t:'AI Desk & signals',d:'Marcus, Aria, Leo + the rule engine.',body:`<h3>Your investment team</h3><p><b>Marcus</b> (Fund Manager) gives portfolio-level calls. <b>Aria</b> (Analyst) does per-position deep dives — hit "Ask" on any holding. <b>Leo</b> (Scout) hunts new opportunities.</p><p>Signal Rules fire alerts across five families — Portfolio, Macro, FX, DCA, Calendar — and feed the daily briefing.</p>`},
+  {n:'CH 07',t:'Cadence & Claude Code',d:'Monthly, quarterly, annual rhythm + automation.',body:`<h3>Keeping it alive</h3><p><b>Monthly:</b> log DCA, check signals, capture expenses, refresh prices.<br><b>Quarterly:</b> re-underwrite each thesis with the AI Desk.<br><b>Annual:</b> max out tax deductions before Dec 31; reconcile.</p><p>The Settings tab has a Claude Code prompt that automates the monthly price pull, trigger checks and Sheet sync.</p>`},
+  {n:'CH 08',t:'Sync & backup',d:'How localStorage, Sheet and JSON fit together.',body:`<h3>Where your data lives</h3><p>Working data is in your browser (localStorage) so the tool is instant and offline-capable. <code>Sync Sheet</code> pushes a snapshot to me to write into your Master Ledger. <code>Export JSON</code> gives you a portable backup you can re-import anytime.</p>`},
+  {n:'CH 09',t:'Advanced analytics',d:'MWR, live AI Desk, auto salary, benchmarks, tax lots.',body:`<h3>Money-weighted return (MWR / XIRR)</h3><p>MWR is more accurate than simple ROI — it accounts for the timing and size of every DCA buy. The Holdings table shows MWR/yr per position; the Dashboard Total Value tile shows portfolio-level MWR.</p><p><b>Why does it show "—"?</b> MWR needs ≥2 DCA log entries separated by at least 7 days. Once you log real DCA history via the DCA Planner → Execute button, the numbers appear. For best accuracy, log entries spanning 6+ months.</p><h3>Live AI Desk</h3><p>Add your Anthropic API key in <b>Settings → Save profile</b>. Once set, Marcus / Aria / Leo respond live inside the tool — no clipboard, no leaving the browser. Each persona has a full system prompt with your portfolio context injected automatically.</p><h3>Auto monthly salary</h3><p>On every page load, the tool checks if a "Salary in" transaction exists for the current month. If not, it auto-creates it (dated the 25th, or today if past the 25th) and updates your KBank balance. December and March bonuses are added automatically in their respective months. Look for the <code>auto</code> badge in the Transactions tab.</p><h3>Benchmark comparison</h3><p>Go to <b>Settings → Benchmark returns</b> and enter SPY, URTH, and SET50 YTD% each quarter. The Dashboard shows a "vs Benchmark" card with colored bars — green if you're beating the index, red if lagging.</p><h3>Tax lots & sell simulator</h3><p>Every time you add a holding or execute a DCA, a tax lot is automatically created. In Holdings, click <b>Lots</b> on any row to see your lot history (date, units, cost, unrealised gain). Click <b>What if I sell?</b> to run a FIFO or LIFO sell simulation — it shows which lots would be consumed, total realised gain, and an estimated Thai tax impact. Verification with a tax professional is always recommended.</p><h3>Portfolio growth chart</h3><p>The Dashboard growth chart plots two real lines: <b>Invested</b> (your exact cumulative cost basis, reconstructed from tax lots) and <b>Value</b> (snapshotted once per month, starting from your first use of this feature — no backfilled or estimated history). Use the dropdown to scope it to Total Portfolio, an asset class, or a single ticker; the pills to change the timeframe (1M–ALL); and the "vs S&P 500" checkbox to overlay your benchmark. Hover any point for the exact date and value.</p>`}
+];
+function renderTutorial(){
+  document.getElementById('tutUpdated').textContent='Last updated Jun 24, 2026 — I refresh this whenever we add a feature together.';
+  document.getElementById('tutToc').innerHTML=TUT.map((c,i)=>`<div class="tut-ch" onclick="showTut(${i})"><div class="tut-ch-n">${c.n}</div><div class="tut-ch-t">${c.t}</div><div class="tut-ch-d">${c.d}</div></div>`).join('');
+  showTut(0);
+}
+function showTut(i){
+  document.querySelectorAll('.tut-ch').forEach((el,idx)=>el.style.borderColor=idx===i?'var(--lav2)':'var(--line)');
+  document.getElementById('tutBody').innerHTML=TUT[i].body;
+}
+
+function renderSettings(){
+  const p=S.profile;
+  const bm=S.benchmarks||{spy:{ytd:0,yr12:0},urth:{ytd:0,yr12:0},set50:{ytd:0,yr12:0}};
+  document.getElementById('profileBox').innerHTML=`
+    <div class="field-row"><div class="field"><label>Monthly salary (฿)</label><input id="cfg_sal" type="number" value="${p.salaryMonthly}"></div><div class="field"><label>Dec bonus (฿)</label><input id="cfg_dec" type="number" value="${p.decBonus}"></div></div>
+    <div class="field-row"><div class="field"><label>March bonus (months)</label><input id="cfg_mar" type="number" value="${p.marBonusMonths}"></div><div class="field"><label>THB/USD rate</label><input id="cfg_fx" type="number" step="0.01" value="${p.fxRate}"></div></div>
+    <div class="field-row"><div class="field"><label>Rental income / yr (฿)</label><input id="cfg_rent" type="number" value="${S.tax.rental||0}"></div><div class="field"><label>Foreign income remitted (฿)</label><input id="cfg_for" type="number" value="${S.tax.foreignRemitted||0}"></div></div>
+    <div class="field"><label>Anthropic API key <span style="font-weight:400;color:var(--tx3)">(for live AI Desk responses)</span></label><input id="cfg_apiKey" type="password" placeholder="sk-ant-…" value="${p.apiKey||''}"></div>
+    <button class="btn" onclick="saveProfile()">Save profile</button>`;
+  // Inject benchmark card dynamically after Settings view renders
+  const settingsBody=document.querySelector('#view-settings .body');
+  if(settingsBody&&!document.getElementById('bmCard')){
+    const bmCard=document.createElement('div');
+    bmCard.className='card';bmCard.id='bmCard';
+    bmCard.innerHTML=`<div class="card-t">Benchmark returns <span class="sub">update quarterly · used in Dashboard vs Benchmark card</span></div>
+      <div style="font-size:11px;color:var(--tx3);margin-bottom:12px">Enter YTD% and last-12-month% for each index (e.g. 12.5 for +12.5%).</div>
+      ${[['S&P 500 (SPY)','spy'],['MSCI World (URTH)','urth'],['SET50 (Thailand)','set50']].map(([label,key])=>`
+      <div style="margin-bottom:10px"><div style="font-size:11px;font-weight:600;color:var(--tx);margin-bottom:6px">${label}</div>
+      <div class="field-row"><div class="field"><label>YTD %</label><input id="bm_${key}_ytd" type="number" step="0.1" value="${(bm[key]||{ytd:0}).ytd}"></div><div class="field"><label>Last 12m %</label><input id="bm_${key}_yr12" type="number" step="0.1" value="${(bm[key]||{yr12:0}).yr12}"></div></div></div>`).join('')}
+      <button class="btn" onclick="saveBenchmarks()">Save benchmarks</button>`;
+    settingsBody.appendChild(bmCard);
+  } else if(document.getElementById('bmCard')){
+    // Update values in existing card
+    [['spy'],['urth'],['set50']].forEach(([k])=>{
+      const ytdEl=document.getElementById('bm_'+k+'_ytd');
+      const yr12El=document.getElementById('bm_'+k+'_yr12');
+      if(ytdEl)ytdEl.value=(bm[k]||{ytd:0}).ytd;
+      if(yr12El)yr12El.value=(bm[k]||{yr12:0}).yr12;
+    });
+  }
+  document.getElementById('ccPrompt').value=CC_PROMPT;
+}
+function saveProfile(){
+  const get=id=>{const el=document.getElementById(id);return el?+el.value:0;};
+  const getStr=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
+  S.profile.salaryMonthly=get('cfg_sal');S.profile.decBonus=get('cfg_dec');
+  S.profile.marBonusMonths=get('cfg_mar');S.profile.fxRate=get('cfg_fx');
+  S.tax.rental=get('cfg_rent');S.tax.foreignRemitted=get('cfg_for');
+  S.profile.apiKey=getStr('cfg_apiKey');
+  save();renderDashboard();renderTax();renderAI();showToast('Profile saved ✓');
+}
+function saveBenchmarks(){
+  const get=id=>{const el=document.getElementById(id);return el?+el.value:0;};
+  S.benchmarks={
+    spy:{ytd:get('bm_spy_ytd'),yr12:get('bm_spy_yr12')},
+    urth:{ytd:get('bm_urth_ytd'),yr12:get('bm_urth_yr12')},
+    set50:{ytd:get('bm_set50_ytd'),yr12:get('bm_set50_yr12')}
+  };
+  save();renderDashboard();showToast('Benchmarks saved');
+}
+
+const CC_PROMPT=`You are maintaining my Portfolio OS. The repo has positions.json (holdings, DCA schedules, rules, tax profile), playbook.md (my rules), and portfolio-os-v2.html.
+
+Monthly run:
+1. Read positions.json. For each holding, web-search the current price and FX (THB/USD). Update a prices object.
+2. Recompute ROI, portfolio value (THB + USD), and weights. Flag any position whose weight drifted >5 abs or >25% relative from target.
+3. Advance every auto-DCA schedule whose day has passed; append the entry to dca_entry_log with the month's price. List manual DCAs now due.
+4. Check each signal rule (Portfolio, Macro, FX, DCA, Calendar). Output which fired and the recommended action with one-line rationale.
+5. Tax: recompute deductions used vs caps at my 25% marginal rate; report remaining headroom before Dec 31.
+5b. TAX LOTS — verify each DCA/buy created a lot entry in S.taxLots. Log any historical lots not yet captured.
+5c. MWR — confirm portfolioMWR() returns a value (needs ≥2 dcaLog entries with >6 months spread). If showing "—", list which positions need more history logged.
+6. Expenses: summarise MTD by category and flag any subscription renewing in the next 7 days.
+7. Write a dated review note (review-YYYY-MM.md): what changed, what fired, what to do.
+8. Update positions.json and regenerate the dashboard. Then sync to my Google Sheet "Portfolio OS — Master Ledger v2" (id 1ZMqx6qyCid3-3kyQRhkCmdxtdbwkyWZ68eOYDP7xdU4).
+9. BENCHMARKS — if it is quarter-end (Jan/Apr/Jul/Oct), remind me to update SPY, URTH, SET50 YTD returns in Settings → Benchmark returns.
+
+Never execute trades. Surface decisions for me to approve. Frame everything as decision-support, not advice.`;
+
+/* ---------- MODAL ENGINE ---------- */
+let _modalCb=null;
+function openModal(title,bodyHTML,saveCb){
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalBody').innerHTML=bodyHTML;
+  _modalCb=saveCb;
+  document.getElementById('modalBg').classList.add('open');
+  const first=document.querySelector('#modalBody input,#modalBody select');
+  if(first)setTimeout(()=>first.focus(),80);
+}
+function closeModal(){document.getElementById('modalBg').classList.remove('open');_modalCb=null;}
+function modalSubmit(){if(_modalCb)_modalCb();}
+function gv(id){const el=document.getElementById(id);return el?el.value:'';}
+function gcb(id){const el=document.getElementById(id);return el?el.checked:false;}
+
+/* --- ADD HOLDING MODAL --- */
+function addHolding(){
+  openModal('Add position',`
+    <div class="field-row"><div class="field"><label>Ticker / code</label><input id="mTicker" placeholder="e.g. TSMC"></div><div class="field"><label>Full name</label><input id="mName" placeholder="e.g. Taiwan Semiconductor"></div></div>
+    <div class="field-row">
+      <div class="field"><label>Asset type</label><select id="mType"><option value="stock">Stock</option><option value="fund">Mutual Fund</option><option value="etf">ETF</option><option value="crypto">Crypto</option><option value="other">Other</option></select></div>
+      <div class="field"><label>Currency</label><select id="mCur"><option value="THB">THB</option><option value="USD">USD</option></select></div>
+    </div>
+    <div class="field-row"><div class="field"><label>Platform / broker</label><input id="mBroker" placeholder="e.g. IBKR, BBLAM"></div><div class="field"><label>Units held</label><input id="mUnits" type="number" step="any" placeholder="0"></div></div>
+    <div class="field-row"><div class="field"><label>Average cost</label><input id="mAvg" type="number" step="any" placeholder="0"></div><div class="field"><label>Signal</label><select id="mSig"><option>Accumulate</option><option>Hold</option><option>Trim</option></select></div></div>
+    <div class="field" style="display:flex;align-items:center;gap:9px;margin-top:6px"><input type="checkbox" id="mTax" style="width:auto"><label for="mTax">Tax-advantaged (RMF / ThaiESG / SSF)</label></div>
+    <div class="field" id="taxTypeField" style="display:none"><label>Tax scheme</label><select id="mTaxType"><option value="RMF">RMF</option><option value="ThaiESG">ThaiESG</option><option value="SSF">SSF</option></select></div>
+    <div class="field"><label>Next earnings date (optional)</label><input id="mEarnings" type="date"></div>`,
+  ()=>{
+    const ticker=gv('mTicker').trim().toUpperCase();
+    if(!ticker)return alert('Ticker required');
+    const h={id:'h'+uid(),ticker,name:gv('mName')||ticker,type:gv('mType'),cur:gv('mCur'),broker:gv('mBroker'),units:+gv('mUnits'),avg:+gv('mAvg'),tax:gcb('mTax'),taxType:gv('mTaxType'),signal:gv('mSig'),earningsDate:gv('mEarnings')||''};
+    S.holdings.push(h);
+    if(!S.taxLots) S.taxLots=[];
+    if(h.units>0&&h.avg>0) S.taxLots.push({id:'tl'+uid(),ticker:h.ticker,purchase_date:todayISO(),units:h.units,cost_price:h.avg,currency:h.cur,fx_at_buy:h.cur==='USD'?S.profile.fxRate:null,cost_thb:h.cur==='USD'?h.avg*h.units*S.profile.fxRate:h.avg*h.units});
+    save();closeModal();renderAll();
+  });
+  document.getElementById('mTax').addEventListener('change',e=>{document.getElementById('taxTypeField').style.display=e.target.checked?'block':'none';});
+}
+
+/* --- EDIT/DELETE HOLDING --- */
+function editHolding(id){
+  const h=S.holdings.find(x=>x.id===id);if(!h)return;
+  openModal('Edit position — '+h.ticker,`
+    <div class="field-row"><div class="field"><label>Units</label><input id="eUnits" type="number" step="any" value="${h.units}"></div><div class="field"><label>Average cost</label><input id="eAvg" type="number" step="any" value="${h.avg}"></div></div>
+    <div class="field-row"><div class="field"><label>Platform</label><input id="eBroker" value="${h.broker}"></div><div class="field"><label>Signal</label><select id="eSig"><option ${h.signal==='Accumulate'?'selected':''}>Accumulate</option><option ${h.signal==='Hold'?'selected':''}>Hold</option><option ${h.signal==='Trim'?'selected':''}>Trim</option></select></div></div>
+    <div class="field" style="display:flex;align-items:center;gap:9px"><input type="checkbox" id="eTax" style="width:auto" ${h.tax?'checked':''}><label for="eTax">Tax-advantaged</label></div>
+    <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)"><button class="btn-ghost" style="color:var(--red);border-color:var(--red)" onclick="deleteHolding('${id}')">Delete position</button></div>`,
+  ()=>{h.units=+gv('eUnits');h.avg=+gv('eAvg');h.broker=gv('eBroker');h.signal=gv('eSig');h.tax=gcb('eTax');save();closeModal();renderAll();});
+}
+function deleteHolding(id){if(!confirm('Delete this position?'))return;S.holdings=S.holdings.filter(x=>x.id!==id);save();closeModal();renderAll();}
+
+/* --- ADD DCA MODAL --- */
+function addDCA(){
+  const tickers=S.holdings.map(h=>h.ticker);
+  openModal('Add DCA schedule',`
+    <div class="field-row">
+      <div class="field"><label>Asset</label><select id="dTicker">${tickers.map(t=>`<option>${t}</option>`).join('')}<option value="_custom">Other (type below)</option></select></div>
+      <div class="field"><label>Custom ticker (if above = Other)</label><input id="dCustom" placeholder="e.g. NVDA"></div>
+    </div>
+    <div class="field-row"><div class="field"><label>Amount</label><input id="dAmt" type="number" step="any" placeholder="0"></div><div class="field"><label>Currency</label><select id="dCur"><option>THB</option><option>USD</option></select></div></div>
+    <div class="field-row"><div class="field"><label>Frequency</label><select id="dFreq"><option value="monthly">Monthly</option><option value="weekly">Weekly</option></select></div><div class="field"><label>Day (date of month or day 1–7)</label><input id="dDay" type="number" min="1" max="31" placeholder="e.g. 23"></div></div>
+    <div class="field-row"><div class="field"><label>Start date</label><input id="dStart" type="date" value="${todayISO()}"></div><div class="field"><label>End date</label><input id="dEnd" type="date"></div></div>
+    <div class="field" style="display:flex;align-items:center;gap:9px"><input type="checkbox" id="dAuto" style="width:auto"><label for="dAuto">Auto-DCA (advances without manual confirm)</label></div>`,
+  ()=>{
+    const ticker=(gv('dTicker')==='_custom'?gv('dCustom').trim().toUpperCase():gv('dTicker'));
+    if(!ticker)return alert('Asset required');
+    const totalMonths=Math.max(1,Math.round((new Date(gv('dEnd'))-new Date(gv('dStart')))/(1000*60*60*24*30)));
+    S.dca.push({id:'d'+uid(),ticker,amount:+gv('dAmt'),cur:gv('dCur'),freq:gv('dFreq'),day:+gv('dDay'),start:gv('dStart'),end:gv('dEnd'),auto:gcb('dAuto'),done:0,total:totalMonths});
+    save();closeModal();renderAll();
+  });
+}
+
+/* --- DCA EXECUTE MODAL --- */
+function execDCA(id){
+  const d=S.dca.find(x=>x.id===id);if(!d)return;
+  openModal('Log DCA execution — '+d.ticker,`
+    <p style="font-size:12px;color:var(--tx2);margin-bottom:14px">Record today's fill price. Amount: <b>${d.cur==='USD'?'$'+d.amount:fmtTHB(d.amount)}</b></p>
+    <div class="field-row"><div class="field"><label>Fill price (${d.cur})</label><input id="ePrice" type="number" step="any" placeholder="e.g. 185.20"></div><div class="field"><label>Date</label><input id="eDate" type="date" value="${todayISO()}"></div></div>
+    <div class="field" style="display:flex;align-items:center;gap:9px"><input type="checkbox" id="eAutoFlag" style="width:auto" ${d.auto?'checked':''}><label for="eAutoFlag">Auto-executed (no manual confirm needed)</label></div>`,
+  ()=>{
+    const price=+gv('ePrice');if(!price)return alert('Price required');
+    const fx=d.cur==='USD'?S.profile.fxRate:null;
+    S.dcaLog.unshift({ticker:d.ticker,date:gv('eDate'),price,amount:d.amount,fxAtBuy:fx,status:gcb('eAutoFlag')?'Auto':'Executed'});
+    d.done=Math.min(d.done+1,d.total);
+    // G7: auto-create matching Tx record
+    S.tx.unshift({date:gv('eDate'),from:'KBank (DCA)',to:d.ticker+' via '+((S.holdings.find(h=>h.ticker===d.ticker)||{broker:'—'}).broker),amount:d.cur==='USD'?d.amount*S.profile.fxRate:d.amount,type:'Investment transfer — DCA',dir:'move'});
+    // Update avg cost in holdings + create tax lot
+    const h=S.holdings.find(x=>x.ticker===d.ticker);
+    if(h){
+      const newUnits=d.cur==='USD'?d.amount/price:d.amount/price;
+      h.avg=((h.avg*h.units)+(price*newUnits))/(h.units+newUnits);
+      h.units=+(h.units+newUnits).toFixed(6);
+      if(!S.taxLots) S.taxLots=[];
+      const fxb=d.cur==='USD'?S.profile.fxRate:null;
+      S.taxLots.push({id:'tl'+uid(),ticker:d.ticker,purchase_date:gv('eDate'),units:newUnits,cost_price:price,currency:d.cur,fx_at_buy:fxb,cost_thb:d.cur==='USD'?price*newUnits*S.profile.fxRate:price*newUnits});
+    }
+    save();closeModal();renderAll();
+  });
+}
+
+/* --- ADD EXPENSE MODAL --- */
+const EXP_CATS=['Food & dining','Transport','Shopping','Health & wellness','Entertainment','Travel','Utilities & bills','Subscriptions','Family transfers','Investment transfers','Rent/mortgage','Foreign currency','Other'];
+const EXP_TYPES=['Credit card','Recurring','Transfer — investment','Transfer — family','Transfer — other','Cash','Foreign currency','Other'];
+function addExpense(){
+  openModal('Add expense',`
+    <div class="field-row"><div class="field"><label>Date</label><input id="xDate" type="date" value="${todayISO()}"></div><div class="field"><label>Amount (฿)</label><input id="xAmt" type="number" step="any" placeholder="0"></div></div>
+    <div class="field"><label>Merchant / description</label><input id="xMerch" placeholder="e.g. Villa Market, Grab, Family"></div>
+    <div class="field-row">
+      <div class="field"><label>Category</label><select id="xCat">${EXP_CATS.map(c=>`<option>${c}</option>`).join('')}</select></div>
+      <div class="field"><label>Type</label><select id="xType">${EXP_TYPES.map(t=>`<option>${t}</option>`).join('')}</select></div>
+    </div>
+    <div class="field"><label>Account / card</label><input id="xAcct" placeholder="e.g. KBank CC, SCB CC, KBank"></div>`,
+  ()=>{
+    if(!gv('xAmt'))return alert('Amount required');
+    S.expenses.unshift({date:gv('xDate'),merchant:gv('xMerch')||'—',amount:+gv('xAmt'),cat:gv('xCat'),type:gv('xType'),acct:gv('xAcct')||'—'});
+    // Also update expTrend for current month
+    const mo=new Date().toLocaleString('default',{month:'short'});
+    const tr=S.expTrend.find(x=>x.m===mo);if(tr)tr.v+=+gv('xAmt');
+    save();closeModal();renderAll();
+  });
+}
+
+/* --- ADD SUBSCRIPTION MODAL --- */
+function addSub(){
+  openModal('Add subscription',`
+    <div class="field"><label>Service name</label><input id="sName" placeholder="e.g. Netflix"></div>
+    <div class="field-row"><div class="field"><label>Monthly amount (฿)</label><input id="sAmt" type="number" step="any" placeholder="0"></div><div class="field"><label>Renewal day</label><input id="sDay" type="number" min="1" max="31" placeholder="e.g. 5"></div></div>
+    <div class="field"><label>Category</label><select id="sCat">${EXP_CATS.map(c=>`<option>${c}</option>`).join('')}</select></div>`,
+  ()=>{
+    if(!gv('sName'))return alert('Name required');
+    S.subs.push({name:gv('sName'),amount:+gv('sAmt'),day:+gv('sDay'),cat:gv('sCat')});
+    save();closeModal();renderExpenses();
+  });
+}
+
+/* --- ADD TRANSACTION MODAL --- */
+function addTx(){
+  openModal('Add transaction',`
+    <div class="field-row"><div class="field"><label>Date</label><input id="tDate" type="date" value="${todayISO()}"></div><div class="field"><label>Amount (฿)</label><input id="tAmt" type="number" step="any" placeholder="0"></div></div>
+    <div class="field-row"><div class="field"><label>From account</label><input id="tFrom" placeholder="e.g. KBank salary"></div><div class="field"><label>To account</label><input id="tTo" placeholder="e.g. IBKR"></div></div>
+    <div class="field-row">
+      <div class="field"><label>Type</label><input id="tType" placeholder="e.g. Salary in, Investment transfer"></div>
+      <div class="field"><label>Direction</label><select id="tDir"><option value="in">In (income)</option><option value="move">Move (transfer)</option><option value="out">Out (expense)</option></select></div>
+    </div>`,
+  ()=>{
+    if(!gv('tAmt'))return alert('Amount required');
+    S.tx.unshift({date:gv('tDate'),from:gv('tFrom'),to:gv('tTo'),amount:+gv('tAmt'),type:gv('tType'),dir:gv('tDir')});
+    save();closeModal();renderTx();
+  });
+}
+
+/* --- ADD SIGNAL RULE MODAL --- */
+function addRule(){
+  openModal('Add signal rule',`
+    <div class="field-row">
+      <div class="field"><label>Category</label><select id="rCat"><option value="port">Portfolio</option><option value="macro">Macro</option><option value="fx">FX</option><option value="dca">DCA</option><option value="cal">Calendar</option></select></div>
+      <div class="field"><label>Action</label><select id="rAct"><option>BUY</option><option>HOLD</option><option>TRIM</option><option>ALERT</option><option>REVIEW</option><option>WATCH</option></select></div>
+    </div>
+    <div class="field"><label>Condition description</label><textarea id="rDesc" rows="3" placeholder="e.g. MU drops >15% below avg cost while HBM contracts intact"></textarea></div>`,
+  ()=>{
+    if(!gv('rDesc').trim())return alert('Condition required');
+    const actMap={BUY:'sp-g',HOLD:'sp-y',TRIM:'sp-r',ALERT:'sp-b',REVIEW:'sp-y',WATCH:'sp-b'};
+    const act=gv('rAct');
+    S.rules.push({cat:gv('rCat'),desc:gv('rDesc').trim(),act,actc:actMap[act]||'sp-y'});
+    save();closeModal();renderRules();
+  });
+}
+
+/* --- TAX DEDUCTION EDITOR MODAL --- */
+function editDeductions(){
+  const d=S.tax.ded;
+  openModal('Edit tax deductions',`
+    <p style="font-size:11.5px;color:var(--tx2);margin-bottom:14px">Enter your 2026 actual amounts paid/contributed. RMF & ThaiESG are auto-calculated from your tagged holdings.</p>
+    <div class="field-row"><div class="field"><label>Life insurance (max ฿100k)</label><input id="tdLife" type="number" value="${d.life||0}"></div><div class="field"><label>Health insurance (max ฿25k)</label><input id="tdHealth" type="number" value="${d.health||0}"></div></div>
+    <div class="field-row"><div class="field"><label>PVD contribution</label><input id="tdPvd" type="number" value="${d.pvd||0}"></div><div class="field"><label>Mortgage interest (max ฿100k)</label><input id="tdMort" type="number" value="${d.mortgage||0}"></div></div>
+    <div class="field-row"><div class="field"><label>Charitable donations</label><input id="tdDon" type="number" value="${d.donation||0}"></div><div class="field"><label>Child allowance (฿30k each)</label><input id="tdChild" type="number" value="${d.child||0}"></div></div>
+    <div class="field"><label>Spouse allowance (฿60k if no income)</label><input id="tdSpouse" type="number" value="${d.spouse||0}"></div>`,
+  ()=>{
+    S.tax.ded={life:+gv('tdLife'),health:+gv('tdHealth'),pvd:+gv('tdPvd'),mortgage:+gv('tdMort'),donation:+gv('tdDon'),child:+gv('tdChild'),spouse:+gv('tdSpouse')};
+    save();closeModal();renderTax();
+  });
+}
+
+/* --- UPDATE ACCOUNT BALANCE --- */
+function editAccount(i){
+  const a=S.accounts[i];
+  openModal('Update balance — '+a.name,`
+    <div class="field"><label>Current balance (฿)</label><input id="aBal" type="number" step="any" value="${a.bal}"></div>`,
+  ()=>{S.accounts[i].bal=+gv('aBal');save();closeModal();renderExpenses();});
+}
+
+/* ---------- EVAL SIGNALS (G6/G9) — rules computed against live data ---------- */
+function evalSignals(){
+  const fired=[];
+  const tv=totalValue(), tc=totalCost();
+  const today=new Date(); const todayStr=todayISO();
+
+  S.holdings.forEach(h=>{
+    const roi=roiOf(h);
+    const price=priceOf(h);
+    const w=valTHB(h)/tv*100;
+
+    // Portfolio rules
+    if(h.signal==='Accumulate'&&roi<-10) fired.push({cat:'port',ticker:h.ticker,desc:`${h.ticker} down ${roi.toFixed(1)}% from avg — accumulate trigger`,act:'BUY',actc:'sp-g'});
+    if(h.signal==='Trim'&&roi>50) fired.push({cat:'port',ticker:h.ticker,desc:`${h.ticker} up ${roi.toFixed(1)}% — trim threshold hit`,act:'TRIM',actc:'sp-r'});
+    if(w>35) fired.push({cat:'port',ticker:h.ticker,desc:`${h.ticker} is ${w.toFixed(0)}% of sleeve — concentration risk`,act:'REVIEW',actc:'sp-y'});
+
+    // Calendar: earnings within 14 days
+    if(h.earningsDate){
+      const daysToEarnings=Math.round((new Date(h.earningsDate)-today)/(1000*60*60*24));
+      if(daysToEarnings>=0&&daysToEarnings<=14) fired.push({cat:'cal',ticker:h.ticker,desc:`${h.ticker} earnings in ${daysToEarnings} days (${h.earningsDate})`,act:'WATCH',actc:'sp-b'});
+    }
+  });
+
+  // AI-capex concentration
+  const aiTickers=['TSM','AMZN','ASML','MU'];
+  const aiWeight=S.holdings.filter(h=>aiTickers.includes(h.ticker)).reduce((s,h)=>s+valTHB(h),0)/tv*100;
+  if(aiWeight>75) fired.push({cat:'port',ticker:'SLEEVE',desc:`AI-capex concentration at ${aiWeight.toFixed(0)}% — above 75% threshold`,act:'TRIM',actc:'sp-r'});
+
+  // FX rule: THB strengthened >5% from avg buy rate
+  const avgBuyFx=34.5; // seeded baseline
+  const fxMove=(avgBuyFx-S.profile.fxRate)/avgBuyFx*100;
+  if(fxMove>5) fired.push({cat:'fx',ticker:'THB/USD',desc:`THB strengthened ${fxMove.toFixed(1)}% vs USD — remittance window`,act:'ALERT',actc:'sp-b'});
+
+  // DCA end-date within 60 days
+  S.dca.forEach(d=>{
+    if(!d.end) return;
+    const daysLeft=Math.round((new Date(d.end)-today)/(1000*60*60*24));
+    if(daysLeft>=0&&daysLeft<=60) fired.push({cat:'dca',ticker:d.ticker,desc:`${d.ticker} DCA ends in ${daysLeft} days — review or renew`,act:'REVIEW',actc:'sp-y'});
+  });
+
+  // Log new signals
+  fired.forEach(f=>{
+    if(!S.signalLog.find(sl=>sl.desc===f.desc&&sl.date===todayStr)){
+      S.signalLog.unshift({...f,date:todayStr,acted_on:false});
+    }
+  });
+  if(fired.length) save();
+  return fired;
+}
+
+/* ---------- AUTO-DCA ADVANCE (G2) ---------- */
+function checkAutoDCA(){
+  const today=new Date(); const todayStr=todayISO();
+  S.dca.filter(d=>d.auto).forEach(d=>{
+    // Check if this month's auto entry is already logged
+    const moStr=todayStr.slice(0,7);
+    const alreadyDone=S.dcaLog.find(l=>l.ticker===d.ticker&&l.status==='Auto'&&l.date.slice(0,7)===moStr);
+    if(alreadyDone) return;
+    // Check if due date has passed this month
+    const dueDate=new Date(today.getFullYear(),today.getMonth(),d.day);
+    if(today>=dueDate){
+      const h=S.holdings.find(hh=>hh.ticker===d.ticker);
+      const price=priceOf(h||{ticker:d.ticker,avg:0})||null;
+      S.dcaLog.unshift({ticker:d.ticker,date:todayStr,price,amount:d.amount,fxAtBuy:d.cur==='USD'?S.profile.fxRate:null,status:'Auto'});
+      d.done=Math.min(d.done+1,d.total);
+      // Auto-create Tx record (G7)
+      S.tx.unshift({date:todayStr,from:'Auto-DCA',to:d.ticker,amount:d.cur==='USD'?d.amount*S.profile.fxRate:d.amount,type:'Investment transfer',dir:'move'});
+      // Grow the position + create a tax lot — same as a manual execDCA, so auto and
+      // manual DCA stay consistent (units, avg cost, lots, MWR, invested-vs-value chart).
+      if(h&&price>0){
+        const newUnits=d.amount/price;
+        h.avg=((h.avg*h.units)+(price*newUnits))/(h.units+newUnits);
+        h.units=+(h.units+newUnits).toFixed(6);
+        if(!S.taxLots) S.taxLots=[];
+        S.taxLots.push({id:'tl'+uid(),ticker:d.ticker,purchase_date:todayStr,units:newUnits,cost_price:price,currency:d.cur,fx_at_buy:d.cur==='USD'?S.profile.fxRate:null,cost_thb:d.cur==='USD'?price*newUnits*S.profile.fxRate:price*newUnits});
+      }
+    }
+  });
+  save();
+}
+
+/* ---------- ANNUALISED RETURN (G3) ---------- */
+function annReturn(h){
+  const roi=roiOf(h)/100;
+  // Use earliest dcaLog entry or a default of 365 days
+  const logs=S.dcaLog.filter(l=>l.ticker===h.ticker).sort((a,b)=>a.date.localeCompare(b.date));
+  const firstDate=logs.length?new Date(logs[0].date):new Date(Date.now()-365*24*60*60*1000);
+  const days=Math.max(1,Math.round((new Date()-firstDate)/(1000*60*60*24)));
+  return (Math.pow(1+roi,365/days)-1)*100;
+}
+
+/* ---------- XIRR / MWR (P1) ---------- */
+function xirr(flows){
+  if(!flows||flows.length<2) return null;
+  const t0=flows[0].date.getTime(),yr=365.25*24*60*60*1000;
+  let rate=0.1;
+  for(let i=0;i<100;i++){
+    let f=0,df=0;
+    for(const cf of flows){
+      const t=(cf.date.getTime()-t0)/yr;
+      const pv=Math.pow(1+rate,t);
+      f+=cf.amount/pv;
+      df+=(-t)*cf.amount/((1+rate)*pv);
+    }
+    if(Math.abs(f)<0.00001) break;
+    const next=rate-f/df;
+    if(Math.abs(next-rate)<0.00001){rate=next;break;}
+    rate=next;
+    if(rate<=-1) return null;
+  }
+  return (rate>-1&&rate<10)?rate:null;
+}
+function mwrOf(h){
+  const logs=S.dcaLog.filter(l=>l.ticker===h.ticker).sort((a,b)=>a.date.localeCompare(b.date));
+  if(!logs.length) return null;
+  const today=new Date(),firstDate=new Date(logs[0].date);
+  if((today-firstDate)/(1000*60*60*24)<7) return null;
+  const flows=logs.map(l=>({date:new Date(l.date),amount:-(l.amount*(h.cur==='USD'?(l.fxAtBuy||S.profile.fxRate):1))}));
+  flows.push({date:today,amount:valTHB(h)});
+  const r=xirr(flows);return r!==null?r*100:null;
+}
+function portfolioMWR(){
+  const allFlows=[];
+  S.dcaLog.forEach(l=>{
+    const h=S.holdings.find(x=>x.ticker===l.ticker);if(!h) return;
+    allFlows.push({date:new Date(l.date),amount:-(l.amount*(h.cur==='USD'?(l.fxAtBuy||S.profile.fxRate):1))});
+  });
+  if(!allFlows.length) return null;
+  allFlows.sort((a,b)=>a.date-b.date);
+  allFlows.push({date:new Date(),amount:totalValue()});
+  const r=xirr(allFlows);return r!==null?r*100:null;
+}
+
+/* ---------- GROWTH CHART — INVESTED VS VALUE ---------- */
+function scopeMatch(scope,ticker,type){
+  if(scope==='total') return true;
+  if(scope.ticker) return scope.ticker===ticker;
+  if(scope.type) return scope.type===type;
+  return true;
+}
+function investedToDateTHB(scope,asOfDate){
+  return (S.taxLots||[]).filter(l=>{
+    const h=S.holdings.find(x=>x.ticker===l.ticker);
+    return l.purchase_date<=asOfDate&&scopeMatch(scope,l.ticker,h&&h.type);
+  }).reduce((s,l)=>s+(l.cost_thb||0),0);
+}
+function snapshotValueForScope(snapshot,scope){
+  return (snapshot.byHolding||[]).filter(b=>scopeMatch(scope,b.ticker,b.type)).reduce((s,b)=>s+b.value,0);
+}
+function liveValueForScope(scope){
+  return scope==='total'?totalValue():S.holdings.filter(h=>scopeMatch(scope,h.ticker,h.type)).reduce((s,h)=>s+valTHB(h),0);
+}
+const GROWTH_RANGE_DAYS={'1M':30,'3M':91,'6M':182,'1Y':365,'ALL':99999};
+function growthSeriesFor(scope,range){
+  const days=GROWTH_RANGE_DAYS[range]||182;
+  const curMonth=todayISO().slice(0,7);
+  let earliest=new Date(Date.now()-days*86400000).toISOString().slice(0,7);
+  if(range==='ALL'){
+    const lotDates=(S.taxLots||[]).filter(l=>{
+      const h=S.holdings.find(x=>x.ticker===l.ticker);
+      return scopeMatch(scope,l.ticker,h&&h.type);
+    }).map(l=>l.purchase_date.slice(0,7));
+    const dcaDates=(S.dcaLog||[]).filter(l=>{
+      const h=S.holdings.find(x=>x.ticker===l.ticker);
+      return scopeMatch(scope,l.ticker,h&&h.type);
+    }).map(l=>l.date.slice(0,7));
+    const allDates=[...lotDates,...dcaDates].sort();
+    earliest=allDates.length?allDates[0]:curMonth;
+  }
+  const months=[];
+  let cur=new Date(earliest+'-01');
+  const endD=new Date(curMonth+'-01');
+  while(cur<=endD){months.push(cur.toISOString().slice(0,7));cur.setMonth(cur.getMonth()+1);}
+  if(!months.length) months.push(curMonth);
+
+  const invested=months.map((m,i)=>({x:m,v:investedToDateTHB(scope,i===months.length-1?todayISO():m+'-31')}));
+
+  const histByMonth={};(S.growthHistory||[]).forEach(g=>{histByMonth[g.date.slice(0,7)]=g;});
+  const value=months.map(m=>{
+    if(m===curMonth) return {x:m,v:liveValueForScope(scope)};
+    const snap=histByMonth[m];
+    return snap?{x:m,v:snapshotValueForScope(snap,scope)}:null;
+  }).filter(Boolean);
+
+  let benchmark=null;
+  if(scope==='total'&&growthBenchOn&&invested.length){
+    const bm=(S.benchmarks||{}).spy;
+    if(bm){
+      const startV=invested[0].v||0,ytd=(bm.ytd||0)/100,n=invested.length;
+      benchmark=invested.map((p,i)=>({x:p.x,v:startV*(1+ytd*(n>1?i/(n-1):1))}));
+    }
+  }
+  return {invested,value,benchmark,xLabels:months};
+}
+
+/* ---------- LIVE CLAUDE API — AI DESK (P2) ---------- */
+function buildPortfolioContext(){
+  const tv=totalValue(),tc=totalCost();
+  const lines=[`Portfolio: ${fmtTHBk(tv)} total (${fmtUSD(tv/S.profile.fxRate)}), ROI ${pct((tv-tc)/tc*100)}, THB/USD ${S.profile.fxRate}`];
+  S.holdings.forEach(h=>lines.push(`${h.ticker}: ${h.units} units avg ${h.cur==='USD'?'$'+h.avg.toFixed(2):fmtTHB(h.avg)}, price ${h.cur==='USD'?'$'+priceOf(h):fmtTHB(priceOf(h))}, ROI ${pct(roiOf(h))}, signal ${h.signal}${h.earningsDate?' earnings '+h.earningsDate:''}`));
+  const fired=S.signalLog.slice(0,3);
+  if(fired.length) lines.push('Recent signals: '+fired.map(s=>s.ticker+' '+s.act).join(', '));
+  return lines.join('\n');
+}
+const SYSTEM_PROMPTS={
+  marcus:'You are Marcus, a senior fund manager reviewing Putt\'s personal investment portfolio. Putt is an aggressive investor based in Bangkok with a 3–10 year horizon. His satellite sleeve is concentrated in AI-infrastructure names (TSMC, ASML, Micron, Amazon) which creates correlated risk — always flag if combined weight exceeds 70%. His Thai funds (ThaiESG, RMF) are tax-advantaged. His marginal tax rate is 25%. You give portfolio-level calls: rebalance decisions, macro positioning, concentration risk, and thesis-level verdicts. You are direct and evidence-based. You frame everything as decision-support, not financial advice. You never say "buy" or "sell" as commands — you surface the situation and the option. Always show THB and USD side by side.',
+  aria:'You are Aria, a research analyst. You give per-position deep dives for Putt\'s portfolio. For each position you cover: latest quarter results (revenue, margin, guidance), current valuation (P/E or P/S), how it compares to the buy triggers and kill triggers Putt has set, and a STATUS verdict (Accumulate / Hold / Trim) with rationale. You are precise, data-driven, and concise. You frame everything as decision-support.',
+  leo:'You are Leo, an investment scout. You search for new opportunities across global stocks, Thai mutual funds, ETFs, and crypto that fit Putt\'s aggressive medium-long profile. You prioritise ideas that DIVERSIFY away from AI-capex concentration (TSMC/ASML/Micron/Amazon already dominate). For each opportunity: name, ticker, asset class, one-paragraph thesis, specific buy trigger, kill trigger, and suggested sleeve weight. You are opportunistic and creative, but disciplined about fit.'
+};
+async function callClaudeAPI(persona,userMsg){
+  const bubble=document.getElementById('aiResponse');if(!bubble) return;
+  bubble.innerHTML='<span style="color:var(--tx3)">●●● thinking…</span>';
+  const ctx=buildPortfolioContext();
+  const sys=SYSTEM_PROMPTS[persona]+'\n\nCurrent portfolio context:\n'+ctx;
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'content-type':'application/json','x-api-key':S.profile.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,stream:true,system:sys,messages:[{role:'user',content:userMsg}]})
+    });
+    if(!resp.ok){const e=await resp.json();bubble.textContent='Error: '+(e.error?.message||resp.status);return;}
+    const reader=resp.body.getReader();const dec=new TextDecoder();
+    let text='';bubble.textContent='';
+    while(true){
+      const{done,value}=await reader.read();if(done) break;
+      for(const line of dec.decode(value,{stream:true}).split('\n')){
+        if(!line.startsWith('data:')) continue;
+        const raw=line.slice(5).trim();if(raw==='[DONE]') break;
+        try{const ev=JSON.parse(raw);if(ev.type==='content_block_delta'&&ev.delta?.type==='text_delta'){text+=ev.delta.text;bubble.textContent=text;}}catch(e){}
+      }
+    }
+    if(!text) bubble.textContent='(no response)';
+  }catch(e){bubble.textContent='Error: '+e.message+' — check API key in Settings.';}
+}
+
+/* ---------- TOAST (P3) ---------- */
+function showToast(msg){
+  const el=document.createElement('div');
+  el.textContent=msg;
+  el.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--mint);color:#065F46;padding:10px 20px;border-radius:8px;font-size:12px;font-weight:600;z-index:200;box-shadow:0 4px 14px rgba(0,0,0,.15);transition:opacity .4s';
+  document.body.appendChild(el);
+  setTimeout(()=>{el.style.opacity='0';setTimeout(()=>el.remove(),400);},3000);
+}
+
+/* ---------- AUTO MONTHLY SALARY (P3) ---------- */
+function checkMonthlySalary(){
+  const today=new Date();const moStr=todayISO().slice(0,7);
+  if(S.tx.find(t=>t.type==='Salary in'&&t.date.slice(0,7)===moStr)) return;
+  const day25=(today.getDate()>=25)?todayISO():`${moStr}-25`;
+  S.tx.unshift({date:day25,from:'KBank (salary)',to:'—',amount:S.profile.salaryMonthly,type:'Salary in',dir:'in',auto:true});
+  if(today.getMonth()===11&&S.profile.decBonus>0)
+    S.tx.unshift({date:day25,from:'KBank (salary)',to:'—',amount:S.profile.decBonus,type:'December bonus — fixed',dir:'in',auto:true});
+  if(today.getMonth()===2&&S.profile.marBonusMonths>0)
+    S.tx.unshift({date:day25,from:'KBank (salary)',to:'—',amount:S.profile.salaryMonthly*S.profile.marBonusMonths,type:'March bonus — variable',dir:'in',auto:true});
+  const kb=S.accounts.find(a=>a.name.includes('KBank (main'));if(kb) kb.bal+=S.profile.salaryMonthly;
+  showToast('Salary auto-logged for '+today.toLocaleString('default',{month:'long'})+' '+today.getFullYear());
+  save();
+}
+
+/* ---------- MONTHLY GROWTH SNAPSHOT ---------- */
+function checkMonthlySnapshot(){
+  const moStr=todayISO().slice(0,7);
+  if(!S.growthHistory) S.growthHistory=[];
+  if(S.growthHistory.some(g=>g.date.slice(0,7)===moStr)) return;
+  S.growthHistory.push({
+    date:todayISO(),
+    totalValue:totalValue(),
+    totalInvested:totalCost(),
+    byHolding:S.holdings.map(h=>({ticker:h.ticker,type:h.type,value:valTHB(h),invested:costTHB(h)}))
+  });
+  save();
+}
+
+/* ---------- TAX LOTS — TOGGLE + SELL SIM (P5) ---------- */
+function toggleLots(hid){
+  const row=document.getElementById('hrow-'+hid);if(!row) return;
+  const ex=document.getElementById('lots-'+hid);if(ex){ex.remove();return;}
+  const h=S.holdings.find(x=>x.id===hid);if(!h) return;
+  const lots=(S.taxLots||[]).filter(l=>l.ticker===h.ticker).sort((a,b)=>a.purchase_date.localeCompare(b.purchase_date));
+  const price=priceOf(h);
+  const lotsHtml=lots.length?`<table class="tbl" style="font-size:10.5px;margin-top:6px"><thead><tr><th>Date</th><th>Units</th><th>Cost</th><th>Cost (฿)</th><th>Unreal. gain</th></tr></thead><tbody>`+
+    lots.map(l=>{const ct=l.cost_thb||(l.cost_price*l.units*(l.fx_at_buy||1));const cv=h.cur==='USD'?price*l.units*S.profile.fxRate:price*l.units;const g=cv-ct;return `<tr><td class="mono">${l.purchase_date}</td><td class="mono">${(+l.units).toFixed(4)}</td><td class="mono">${h.cur==='USD'?'$'+l.cost_price.toFixed(2):fmtTHB(l.cost_price)}</td><td class="mono">${fmtTHBk(ct)}</td><td class="mono ${g>=0?'pos':'neg'}">${g>=0?'+':''}${fmtTHBk(g)}</td></tr>`;}).join('')+'</tbody></table>'
+    :'<div style="font-size:11px;color:var(--tx3);padding:8px 0">No lots yet — created when you Add a holding or log a DCA execution.</div>';
+  const panelInner=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:8px"><span style="font-size:11px;font-weight:600">Tax lots — ${h.ticker}</span><button class="btn btn-sm" onclick="showSellSim('${h.ticker}')">What if I sell?</button></div><div style="overflow-x:auto">${lotsHtml}</div>`;
+  if(row.tagName==='TR'){
+    const tr=document.createElement('tr');tr.id='lots-'+hid;
+    tr.innerHTML=`<td colspan="13" style="background:#FAFAFA;padding:10px 16px">${panelInner}</td>`;
+    row.insertAdjacentElement('afterend',tr);
+  }else{
+    const div=document.createElement('div');div.id='lots-'+hid;div.className='m-card';div.style.cssText='background:#FAFAFA;margin-top:-2px';
+    div.innerHTML=panelInner;
+    row.insertAdjacentElement('afterend',div);
+  }
+}
+function showSellSim(ticker){
+  const h=S.holdings.find(x=>x.ticker===ticker);if(!h) return;
+  openModal('Sell simulator — '+ticker,`
+    <div class="field-row"><div class="field"><label>Units to sell</label><input id="ss_units" type="number" step="any" placeholder="e.g. 10"></div><div class="field"><label>Method</label><select id="ss_method"><option value="fifo">FIFO (oldest first)</option><option value="lifo">LIFO (newest first)</option></select></div></div>
+    <div id="ss_result" style="margin-top:12px"></div>`,null);
+  const btn=document.getElementById('modalSave');btn.textContent='Calculate';
+  btn.onclick=()=>{
+    const toSell=+document.getElementById('ss_units').value;if(!toSell||toSell<=0) return alert('Enter units to sell');
+    const fifo=document.getElementById('ss_method').value==='fifo';
+    let lots=(S.taxLots||[]).filter(l=>l.ticker===ticker).sort((a,b)=>fifo?a.purchase_date.localeCompare(b.purchase_date):b.purchase_date.localeCompare(a.purchase_date));
+    const availUnits=lots.reduce((s,l)=>s+(+l.units),0);
+    if(!lots.length){document.getElementById('ss_result').innerHTML=`<div class="note" style="font-size:11px">No tax lots recorded for ${ticker} yet. Lots are created when you Add a holding or log a DCA execution — log your purchase history first to simulate a sale.</div>`;return;}
+    let rem=toSell;const consumed=[];
+    for(const lot of lots){if(rem<=0) break;const take=Math.min(rem,+lot.units);const ct=(lot.cost_thb||lot.cost_price*lot.units*(lot.fx_at_buy||1))/(+lot.units)*take;const cv=h.cur==='USD'?priceOf(h)*take*S.profile.fxRate:priceOf(h)*take;consumed.push({date:lot.purchase_date,units:take,ct,cv,gain:cv-ct});rem-=take;}
+    const totalGain=consumed.reduce((s,c)=>s+c.gain,0);
+    const soldUnits=toSell-rem;
+    const overSellWarn=rem>1e-9?`<div class="note" style="margin-top:8px;font-size:10.5px;background:var(--amb-bg);border-color:#FCD34D;color:#92400E">⚠ You entered <b>${toSell}</b> units but only <b>${availUnits.toFixed(4)}</b> are tracked in lots. Simulation reflects selling the <b>${soldUnits.toFixed(4)}</b> available.</div>`:'';
+    const taxNote=(h.taxType==='ThaiESG'||h.taxType==='RMF')?'ThaiESG/RMF: capital gains generally <b>exempt</b> — verify with a tax professional.':h.cur==='USD'?`Estimated tax at 25% marginal rate on remitted gain: <b>${fmtTHBk(Math.max(0,totalGain)*0.25)}</b> — verify with a tax professional.`:'Verify CGT treatment with a tax professional.';
+    document.getElementById('ss_result').innerHTML=overSellWarn+`<table class="tbl" style="font-size:10.5px"><thead><tr><th>Lot date</th><th>Units</th><th>Cost (฿)</th><th>Value (฿)</th><th>Gain (฿)</th></tr></thead><tbody>`+
+      consumed.map(c=>`<tr><td class="mono">${c.date}</td><td class="mono">${c.units.toFixed(4)}</td><td class="mono">${fmtTHBk(c.ct)}</td><td class="mono">${fmtTHBk(c.cv)}</td><td class="mono ${c.gain>=0?'pos':'neg'}">${c.gain>=0?'+':''}${fmtTHBk(c.gain)}</td></tr>`).join('')+
+      `</tbody></table><div style="margin-top:10px;font-size:11.5px"><b>Total realised gain: <span class="${totalGain>=0?'pos':'neg'}">${totalGain>=0?'+':''}${fmtTHBk(totalGain)}</span></b></div><div class="note" style="margin-top:8px;font-size:10.5px">${taxNote}</div><div style="margin-top:6px;font-size:10px;color:var(--tx3)">Decision-support only. Thai CGT varies by asset type and remittance year.</div>`;
+  };
+}
+
+/* ---------- PRICE UPDATE MODAL (G15) ---------- */
+function refreshPrices(){
+  const fields=S.holdings.map(h=>`<div class="field-row"><div class="field" style="flex:0 0 80px"><label style="font-family:var(--mono);font-weight:700">${h.ticker}</label><div style="font-size:10px;color:var(--tx3)">${h.cur}</div></div><div class="field"><label>Current price</label><input id="pr_${h.ticker}" type="number" step="any" value="${priceOf(h)}"></div></div>`).join('');
+  openModal('Update prices',`
+    <div class="field" style="margin-bottom:12px"><div style="font-size:11.5px;color:var(--tx2)">Enter today's prices. Ask Claude in chat for live prices: <span style="font-family:var(--mono);font-size:10px;color:var(--lav-d)">fetch current prices for TSM AMZN ASML MU BTC ThaiESG RMF</span></div></div>
+    ${fields}
+    <div class="field-row"><div class="field"><label>THB/USD rate</label><input id="pr_fxRate" type="number" step="0.01" value="${S.profile.fxRate}"></div><div class="field"></div></div>`,
+  ()=>{
+    S.holdings.forEach(h=>{const el=document.getElementById('pr_'+h.ticker);if(el&&+el.value>0)S.prices[h.ticker]=+el.value;});
+    const fxEl=document.getElementById('pr_fxRate');if(fxEl&&+fxEl.value>0)S.profile.fxRate=+fxEl.value;
+    // Log FX rate
+    const mo=new Date().toLocaleString('default',{month:'short'});
+    const existing=S.fx.find(f=>f.date===mo);
+    if(existing)existing.rate=S.profile.fxRate;else S.fx.push({date:mo,rate:S.profile.fxRate});
+    save();closeModal();renderAll();
+  });
+}
+
+/* ---------- SLIP / EXPENSE CAPTURE (W5) ---------- */
+function captureSlip(){
+  openModal('Capture expense from slip / message',`
+    <div class="field"><label>Paste the slip text, CC statement line, or describe the expense</label><textarea id="slipText" rows="5" placeholder="e.g. VILLA MARKET 1,240.00 THB 22/06/2026&#10;or: paid Grab 280 baht today&#10;or: KBank CC charge 4,500 Central Dept Store June 18"></textarea></div>
+    <div style="font-size:11px;color:var(--tx3);margin-top:4px">Claude will extract merchant, amount, date and category. After saving this will be sent to Claude to parse — confirm the result before it logs.</div>`,
+  ()=>{
+    const txt=gv('slipText').trim();
+    if(!txt)return alert('Please paste the slip text');
+    closeModal();
+    sendToChat(`Parse this expense slip and extract: date, merchant, amount (THB), category (from: ${EXP_CATS.join(', ')}), and account/card. Then confirm with me before logging to Portfolio OS.\n\nSlip text:\n${txt}`);
+  });
+}
+
+/* --- SEND TO CHAT (fixed async) --- */
+function sendToChat(text){
+  if(window.sendPrompt){sendPrompt(text);return;}
+  // Async clipboard with proper fallback
+  const fallback=()=>{
+    const ta=document.createElement('textarea');
+    ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy')}catch(e){}
+    document.body.removeChild(ta);
+    alert('Copied to clipboard! Paste this into your Claude chat:\n\n'+text.slice(0,200)+(text.length>200?'…':''));
+  };
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(text).then(()=>alert('Copied! Paste into Claude chat.')).catch(fallback);
+  } else {fallback();}
+}
+
+function syncPrompt(){
+  setSync('Syncing…');
+  const payload=JSON.stringify({
+    holdings:S.holdings,
+    dca:S.dca,
+    dcaLog:S.dcaLog,
+    tx:S.tx,
+    fx:S.fx,
+    expenses:S.expenses.slice(0,200),
+    subs:S.subs,
+    accounts:S.accounts,
+    tax:S.tax,
+    rules:S.rules,
+    signalLog:(S.signalLog||[]).slice(0,50),
+    opportunities:S.opportunities||[],
+    benchmarks:S.benchmarks||{},
+    taxLots:(S.taxLots||[]),
+    growthHistory:(S.growthHistory||[])
+  },null,2);
+  sendToChat('Please sync my Portfolio OS data to my Google Sheet "Portfolio OS — Master Ledger v2" (ID: 1ZMqx6qyCid3-3kyQRhkCmdxtdbwkyWZ68eOYDP7xdU4). Write each key to its matching tab: holdings→Holdings, dca→DCA_Schedule, dcaLog→DCA_Entry_Log, tx→Transactions, fx→FX_Rates, expenses→Expenses_Log, subs→Subscriptions, accounts→Account_Balances, tax.ded→Tax_Deductions, signalLog→Signal_Log, opportunities→Opportunities, taxLots→Tax_Lots, benchmarks→Settings (as key-value rows), growthHistory→Settings (as key-value rows, travels with benchmarks until a dedicated tab exists). Append new rows; do not overwrite existing rows unless the id matches. Here is my data:\n\n'+payload.slice(0,6000));
+  setTimeout(()=>setSync('Sync requested — check Claude chat'),2000);
+}
+function askAnalyst(ticker){sendToChat(`[AI Desk · Aria the Analyst] Re-underwrite ${ticker}: latest quarter revenue, margin, guidance, current valuation, my buy/kill triggers. Return a STATUS (Accumulate/Hold/Trim) with rationale.`);}
+function scanNow(){sendToChat('[AI Desk · Leo the Scout] Scan across global stocks, Thai funds, ETFs and crypto for 3–5 opportunities aligned to my aggressive medium-long horizon. Flag anything that diversifies away from my AI-capex concentration (TSMC/ASML/MU/AMZN). Include ticker, asset class, one-line thesis, and suggested entry condition.');}
+function openGuide(){alert('PDF guide: download the "Portfolio-OS-Guide.pdf" file delivered alongside this tool, or ask Claude to re-send it.');}
+function copyCC(){
+  const fallback=()=>{const ta=document.createElement('textarea');ta.value=CC_PROMPT;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);alert('Claude Code prompt copied!');};
+  if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(CC_PROMPT).then(()=>alert('Claude Code prompt copied!')).catch(fallback);}else{fallback();}
+}
+function exportJSON(){
+  const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='portfolio-os-backup-'+todayISO()+'.json';a.click();
+}
+function importJSON(){
+  const i=document.createElement('input');i.type='file';i.accept='.json';
+  i.onchange=e=>{const f=e.target.files[0];const r=new FileReader();r.onload=()=>{try{S=mergeDefaults(DEFAULT,JSON.parse(r.result));save();renderAll();alert('Data imported successfully.');}catch(x){alert('Invalid JSON file.');}};r.readAsText(f);};
+  i.click();
+}
+function delRule(i){if(!confirm('Delete this rule?'))return;S.rules.splice(i,1);save();renderRules();}
+
+/* --- MOBILE SIDEBAR --- */
+function openSidebar(){document.querySelector('.sidebar').classList.add('open');document.getElementById('sbOverlay').classList.add('open');}
+function closeSidebar(){document.querySelector('.sidebar').classList.remove('open');document.getElementById('sbOverlay').classList.remove('open');}
+
+/* ---------- ROUTER ---------- */
+function renderAll(){checkAutoDCA();checkMonthlySalary();checkMonthlySnapshot();renderDashboard();renderHoldings();renderDCA();renderTx();renderFX();renderTax();renderExpenses();renderAI();renderRules();renderScout();renderTutorial();renderSettings();}
+window.matchMedia('(max-width:920px)').addEventListener('change',()=>{renderDashboard();renderHoldings();renderTx();renderExpenses();});
+
+document.querySelectorAll('.sb-item').forEach(it=>it.addEventListener('click',()=>{
+  document.querySelectorAll('.sb-item').forEach(x=>x.classList.remove('on'));it.classList.add('on');
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
+  document.getElementById('view-'+it.dataset.view).classList.add('on');
+  window.scrollTo(0,0);
+  closeSidebar();
+}));
+
+// Keyboard: Escape closes modal
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+boot();
+</script>
+</body>
+</html>
