@@ -366,6 +366,7 @@ input,select,textarea{font-family:var(--sans);font-size:13px}
         </div>
         <div class="card mb14"><div class="card-t">vs Benchmark <span class="sub">portfolio YTD vs index · update in Settings</span></div><div id="benchCard"></div></div>
         <div class="card mb14"><div class="card-t">Rebalance <span class="sub">actual vs target weight · set targets via Holdings → Edit</span></div><div id="rebalCard"></div></div>
+        <div class="card mb14"><div class="card-t">Performance <span class="sub">from real monthly snapshots · fills in as history accrues</span></div><div id="perfCard"></div></div>
         <div class="card pad0">
           <div style="padding:16px 16px 0"><div class="card-t">Holdings <span class="sub" id="holdCount"></span></div></div>
           <div style="padding:0 6px 8px" id="dashHoldings"></div>
@@ -379,7 +380,7 @@ input,select,textarea{font-family:var(--sans);font-size:13px}
       <div class="body">
         <div class="page-head row-between">
           <div><div class="page-ey">Portfolio · all asset classes</div><div class="page-title">Holdings</div><div class="page-sub" id="holdSub"></div></div>
-          <button class="btn" onclick="addHolding()">+ Add position</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-ghost" onclick="logDividend()">฿ Log dividend</button><button class="btn" onclick="addHolding()">+ Add position</button></div>
         </div>
         <div class="card pad0"><div style="padding:6px" id="holdingsTbl"></div></div>
         <div class="note" style="margin-top:14px">Tip: tell me <code>"bought 10 TSMC at $185 via IBKR"</code> in chat and I'll log it here and to your Sheet. Flag a position as tax-advantaged (RMF/ThaiESG/SSF) and it feeds the Tax Centre automatically.</div>
@@ -402,7 +403,7 @@ input,select,textarea{font-family:var(--sans);font-size:13px}
       <div class="body">
         <div class="page-head row-between">
           <div><div class="page-ey">Cash flow ledger</div><div class="page-title">Transactions</div><div class="page-sub">Salary in → allocations → expenses out → remaining</div></div>
-          <button class="btn" onclick="addTx()">+ Add transaction</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-ghost" onclick="importCSV('tx')">⇪ Import CSV</button><button class="btn" onclick="addTx()">+ Add transaction</button></div>
         </div>
         <div class="grid3 mb14" id="txKpis"></div>
         <div class="card pad0"><div style="padding:6px" id="txTbl"></div></div>
@@ -451,7 +452,7 @@ input,select,textarea{font-family:var(--sans);font-size:13px}
           <div><div class="page-ey" id="expEy">Spending · month to date</div><div class="page-title">Expenses</div><div class="page-sub">Capture by chat (throw a slip / bill / message) or add manually</div></div>
           <div style="display:flex;gap:8px">
             <button class="btn-ghost" onclick="captureSlip()">📄 Capture slip</button>
-            <button class="btn" onclick="addExpense()">+ Add expense</button>
+            <button class="btn-ghost" onclick="importCSV('exp')">⇪ Import CSV</button><button class="btn" onclick="addExpense()">+ Add expense</button>
           </div>
         </div>
         <div class="grid3 mb14" id="expKpis"></div>
@@ -637,7 +638,8 @@ const DEFAULT={
   signalLog:[],
   benchmarks:{spy:{ytd:0,yr12:0},urth:{ytd:0,yr12:0},set50:{ytd:0,yr12:0}},
   taxLots:[],
-  growthHistory:[]
+  growthHistory:[],
+  dividends:[]
 };
 
 let S=load();
@@ -904,6 +906,17 @@ function renderDashboard(){
       return `<div style="margin-bottom:11px"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px"><span style="color:var(--tx2)"><b style="font-family:var(--mono)">${h.ticker}</b> · ${actual.toFixed(1)}% vs target ${h.target}%</span><span style="font-weight:600;color:${col}">${drift>=0?'+':''}${drift.toFixed(1)} pp${act?' · '+act:''}</span></div><div style="position:relative;height:7px;background:var(--line2);border-radius:5px"><div style="position:absolute;height:100%;border-radius:5px;background:${Math.abs(drift)<2?'var(--mint2)':Math.abs(drift)<5?'var(--yel2)':'var(--blush2)'};width:${Math.min(100,actual*1.2)}%"></div><div style="position:absolute;top:-2px;height:11px;width:2px;background:var(--tx);left:${Math.min(100,h.target*1.2)}%"></div></div></div>`;
     }).join('')+`<div style="font-size:10px;color:var(--tx3);margin-top:4px">Tick = target. Green &lt;2pp · amber 2–5pp · red &gt;5pp drift. Decision-support only.</div>`
     :'<div style="font-size:11.5px;color:var(--tx3);padding:6px 0">No targets set — open <b>Holdings → Edit</b> on a position and set its target weight %</div>';
+  // Performance analytics card
+  const mwr=portfolioMWR(),tw=twr(),dd=maxDrawdown(),vol=volatility(),div12=dividends12M();
+  const nSnaps=(S.growthHistory||[]).length;
+  const stat=(label,val,hint)=>`<div class="mtile" style="flex:1;min-width:130px"><div class="l">${label}</div><div class="v" style="font-size:17px">${val}</div><div class="s" style="color:var(--tx3)">${hint}</div></div>`;
+  document.getElementById('perfCard').innerHTML=`<div style="display:flex;gap:10px;flex-wrap:wrap">
+    ${stat('MWR (your return)',mwr!==null?(mwr>=0?'+':'')+mwr.toFixed(1)+'%/yr':'—','money-weighted · incl. dividends')}
+    ${stat('TWR (strategy)',tw!==null?(tw>=0?'+':'')+tw.toFixed(1)+'%/yr':'—',tw!==null?'time-weighted · excl. timing':'needs 2+ monthly snapshots')}
+    ${stat('Max drawdown',dd!==null?dd.toFixed(1)+'%':'—',dd!==null?'worst peak-to-trough':'needs 2+ monthly snapshots')}
+    ${stat('Volatility',vol!==null?vol.toFixed(1)+'%':'—',vol!==null?'annualised σ of monthly returns':'needs 4+ monthly snapshots')}
+    ${stat('Dividends 12M',fmtTHBk(div12),div12>0&&tv>0?(div12/tv*100).toFixed(2)+'% yield on value':'log via Holdings → ฿ Log dividend')}
+  </div><div style="font-size:10px;color:var(--tx3);margin-top:8px">${nSnaps} monthly snapshot${nSnaps===1?'':'s'} recorded — one saves automatically each month you open the tool. MWR = what <i>you</i> earned (timing matters). TWR = what the <i>strategy</i> earned (timing removed). Comparing the two shows whether your DCA timing helped or hurt.</div>`;
   document.getElementById('holdCount').textContent=S.holdings.length+' positions';
   document.getElementById('dashHoldings').innerHTML=holdRows(S.holdings.slice(0,6));
 }
@@ -1080,7 +1093,7 @@ const TUT=[
   {n:'CH 06',t:'AI Desk & signals',d:'Marcus, Aria, Leo + the rule engine.',body:`<h3>Your investment team</h3><p><b>Marcus</b> (Fund Manager) gives portfolio-level calls. <b>Aria</b> (Analyst) does per-position deep dives — hit "Ask" on any holding. <b>Leo</b> (Scout) hunts new opportunities.</p><p>Signal Rules fire alerts across five families — Portfolio, Macro, FX, DCA, Calendar — and feed the daily briefing.</p>`},
   {n:'CH 07',t:'Cadence & Claude Code',d:'Monthly, quarterly, annual rhythm + automation.',body:`<h3>Keeping it alive</h3><p><b>Monthly:</b> log DCA, check signals, capture expenses, refresh prices.<br><b>Quarterly:</b> re-underwrite each thesis with the AI Desk.<br><b>Annual:</b> max out tax deductions before Dec 31; reconcile.</p><p>The Settings tab has a Claude Code prompt that automates the monthly price pull, trigger checks and Sheet sync.</p>`},
   {n:'CH 08',t:'Sync & backup',d:'How localStorage, Sheet and JSON fit together.',body:`<h3>Where your data lives</h3><p>Working data is in your browser (localStorage) so the tool is instant and offline-capable. <code>Sync Sheet</code> pushes a snapshot to me to write into your Master Ledger. <code>Export JSON</code> gives you a portable backup you can re-import anytime.</p>`},
-  {n:'CH 09',t:'Advanced analytics',d:'MWR, live AI Desk, auto salary, benchmarks, tax lots.',body:`<h3>Money-weighted return (MWR / XIRR)</h3><p>MWR is more accurate than simple ROI — it accounts for the timing and size of every DCA buy. The Holdings table shows MWR/yr per position; the Dashboard Total Value tile shows portfolio-level MWR.</p><p><b>Why does it show "—"?</b> MWR needs ≥2 DCA log entries separated by at least 7 days. Once you log real DCA history via the DCA Planner → Execute button, the numbers appear. For best accuracy, log entries spanning 6+ months.</p><h3>Live AI Desk</h3><p>Add your Anthropic API key in <b>Settings → Save profile</b>. Once set, Marcus / Aria / Leo respond live inside the tool — no clipboard, no leaving the browser. Each persona has a full system prompt with your portfolio context injected automatically.</p><h3>Auto monthly salary</h3><p>On every page load, the tool checks if a "Salary in" transaction exists for the current month. If not, it auto-creates it (dated the 25th, or today if past the 25th) and updates your KBank balance. December and March bonuses are added automatically in their respective months. Look for the <code>auto</code> badge in the Transactions tab.</p><h3>Benchmark comparison</h3><p>Go to <b>Settings → Benchmark returns</b> and enter SPY, URTH, and SET50 YTD% each quarter. The Dashboard shows a "vs Benchmark" card with colored bars — green if you're beating the index, red if lagging.</p><h3>Tax lots & sell simulator</h3><p>Every time you add a holding or execute a DCA, a tax lot is automatically created. In Holdings, click <b>Lots</b> on any row to see your lot history (date, units, cost, unrealised gain). Click <b>What if I sell?</b> to run a FIFO or LIFO sell simulation — it shows which lots would be consumed, total realised gain, and an estimated Thai tax impact. Verification with a tax professional is always recommended.</p><h3>Portfolio growth chart</h3><p>The Dashboard growth chart plots two real lines: <b>Invested</b> (your exact cumulative cost basis, reconstructed from tax lots) and <b>Value</b> (snapshotted once per month, starting from your first use of this feature — no backfilled or estimated history). Use the dropdown to scope it to Total Portfolio, an asset class, or a single ticker; the pills to change the timeframe (1M–ALL); and the "vs S&P 500" checkbox to overlay your benchmark. Hover any point for the exact date and value.</p><h3>Live prices</h3><p>In the Prices modal, hit <b>⚡ Fetch live</b> — BTC and THB/USD fill automatically (free public feeds, no setup). For US stocks, paste a free Finnhub key in Settings once. Thai fund NAVs stay manual. All keys live on your device only — never uploaded.</p><h3>Rebalancing</h3><p>Set a <b>target weight %</b> on any holding (Holdings → Edit). The Dashboard's Rebalance card shows actual vs target with a drift bar and a suggested trim/add amount; a REBALANCE signal fires when drift exceeds 5pp. Decision-support only — you place the trades.</p><h3>Install on iPhone</h3><p>Open the live site in Safari → Share → <b>Add to Home Screen</b>. It launches full-screen like a native app and keeps working offline with your last-synced data.</p>`}
+  {n:'CH 09',t:'Advanced analytics',d:'MWR, live AI Desk, auto salary, benchmarks, tax lots.',body:`<h3>Money-weighted return (MWR / XIRR)</h3><p>MWR is more accurate than simple ROI — it accounts for the timing and size of every DCA buy. The Holdings table shows MWR/yr per position; the Dashboard Total Value tile shows portfolio-level MWR.</p><p><b>Why does it show "—"?</b> MWR needs ≥2 DCA log entries separated by at least 7 days. Once you log real DCA history via the DCA Planner → Execute button, the numbers appear. For best accuracy, log entries spanning 6+ months.</p><h3>Live AI Desk</h3><p>Add your Anthropic API key in <b>Settings → Save profile</b>. Once set, Marcus / Aria / Leo respond live inside the tool — no clipboard, no leaving the browser. Each persona has a full system prompt with your portfolio context injected automatically.</p><h3>Auto monthly salary</h3><p>On every page load, the tool checks if a "Salary in" transaction exists for the current month. If not, it auto-creates it (dated the 25th, or today if past the 25th) and updates your KBank balance. December and March bonuses are added automatically in their respective months. Look for the <code>auto</code> badge in the Transactions tab.</p><h3>Benchmark comparison</h3><p>Go to <b>Settings → Benchmark returns</b> and enter SPY, URTH, and SET50 YTD% each quarter. The Dashboard shows a "vs Benchmark" card with colored bars — green if you're beating the index, red if lagging.</p><h3>Tax lots & sell simulator</h3><p>Every time you add a holding or execute a DCA, a tax lot is automatically created. In Holdings, click <b>Lots</b> on any row to see your lot history (date, units, cost, unrealised gain). Click <b>What if I sell?</b> to run a FIFO or LIFO sell simulation — it shows which lots would be consumed, total realised gain, and an estimated Thai tax impact. Verification with a tax professional is always recommended.</p><h3>Portfolio growth chart</h3><p>The Dashboard growth chart plots two real lines: <b>Invested</b> (your exact cumulative cost basis, reconstructed from tax lots) and <b>Value</b> (snapshotted once per month, starting from your first use of this feature — no backfilled or estimated history). Use the dropdown to scope it to Total Portfolio, an asset class, or a single ticker; the pills to change the timeframe (1M–ALL); and the "vs S&P 500" checkbox to overlay your benchmark. Hover any point for the exact date and value.</p><h3>Live prices</h3><p>In the Prices modal, hit <b>⚡ Fetch live</b> — BTC and THB/USD fill automatically (free public feeds, no setup). For US stocks, paste a free Finnhub key in Settings once. Thai fund NAVs stay manual. All keys live on your device only — never uploaded.</p><h3>Rebalancing</h3><p>Set a <b>target weight %</b> on any holding (Holdings → Edit). The Dashboard's Rebalance card shows actual vs target with a drift bar and a suggested trim/add amount; a REBALANCE signal fires when drift exceeds 5pp. Decision-support only — you place the trades.</p><h3>Install on iPhone</h3><p>Open the live site in Safari → Share → <b>Add to Home Screen</b>. It launches full-screen like a native app and keeps working offline with your last-synced data.</p><h3>Performance analytics</h3><p>The Dashboard's Performance card shows <b>MWR</b> (what you earned — timing and size of your buys matter), <b>TWR</b> (what the strategy earned — timing removed), <b>max drawdown</b>, <b>volatility</b>, and <b>12-month dividend income</b>. TWR, drawdown and volatility compute from real monthly snapshots, so they show "—" until 2–4 months of history accrue. Comparing MWR vs TWR tells you whether your DCA timing is helping or hurting.</p><h3>Dividends</h3><p>Log payouts via <b>Holdings → ฿ Log dividend</b>. Each entry feeds MWR (dividends are part of your true return), creates a Transactions record, and rolls into the 12-month income figure.</p><h3>CSV import</h3><p>Both Transactions and Expenses have an <b>⇪ Import CSV</b> button. Paste a bank or broker export, hit Preview, fix the column mapping if needed, Import. Imported expenses land as category "Other" — re-categorise the big ones and the dashboards update.</p>`}
 ];
 function renderTutorial(){
   document.getElementById('tutUpdated').textContent='Last updated Jun 24, 2026 — I refresh this whenever we add a feature together.';
@@ -1316,6 +1329,112 @@ function addTx(){
   });
 }
 
+/* --- LOG DIVIDEND MODAL --- */
+function logDividend(){
+  if(!S.holdings.length) return alert('Add a holding first');
+  openModal('Log dividend',`
+    <div class="field-row">
+      <div class="field"><label>Holding</label><select id="dvTicker">${S.holdings.map(h=>`<option value="${h.ticker}">${h.ticker} (${h.cur})</option>`).join('')}</select></div>
+      <div class="field"><label>Payment date</label><input id="dvDate" type="date" value="${todayISO()}"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Gross amount <span id="dvCur" style="font-weight:400;color:var(--tx3)">(holding currency)</span></label><input id="dvAmt" type="number" step="any" placeholder="0"></div>
+      <div class="field"><label>Note (optional)</label><input id="dvNote" placeholder="e.g. Q2 dividend, 10% WHT"></div>
+    </div>
+    <div class="note" style="font-size:10.5px">Feeds MWR and the Performance card's 12-month income. Thai-listed dividends carry 10% final withholding; foreign dividends may be assessed when remitted — verify with a tax professional.</div>`,
+  ()=>{
+    const t=gv('dvTicker'),amt=+gv('dvAmt');
+    if(!amt||amt<=0) return alert('Amount required');
+    const h=S.holdings.find(x=>x.ticker===t);
+    S.dividends.unshift({id:'dv'+uid(),ticker:t,date:gv('dvDate'),amount:amt,cur:h?h.cur:'THB',fxAtDiv:h&&h.cur==='USD'?S.profile.fxRate:null,note:gv('dvNote')||''});
+    S.tx.unshift({date:gv('dvDate'),from:t+' dividend',to:(h&&h.broker)||'—',amount:h&&h.cur==='USD'?amt*S.profile.fxRate:amt,type:'Dividend in',dir:'in'});
+    save();closeModal();renderAll();showToast('Dividend logged — MWR updated');
+  });
+}
+
+/* --- CSV IMPORT (statements → transactions or expenses) --- */
+let _csvRows=null;
+function importCSV(mode){
+  _csvRows=null;
+  const isExp=mode==='exp';
+  openModal('Import CSV — '+(isExp?'Expenses':'Transactions'),`
+    <div class="field"><label>Paste CSV from your bank / broker export <span style="font-weight:400;color:var(--tx3)">(first row = column headers)</span></label>
+    <textarea id="csvText" rows="6" style="font-family:var(--mono);font-size:10.5px" placeholder="Date,Description,Amount\n2026-07-01,VILLA MARKET,1240.00\n01/07/2026,Grab ride,-280"></textarea></div>
+    <button type="button" class="btn-ghost btn-sm" onclick="parseCSVPreview('${mode}')">Preview →</button>
+    <div id="csvMap" style="margin-top:10px"></div>
+    <div id="csvPreview" style="margin-top:10px;overflow-x:auto"></div>`,
+  ()=>{ commitCSVImport(mode); });
+  document.getElementById('modalSave').textContent='Import';
+}
+function parseCSVLine(line,delim){
+  const out=[];let cur='',q=false;
+  for(const ch of line){
+    if(ch==='"'){q=!q;continue;}
+    if(ch===delim&&!q){out.push(cur);cur='';continue;}
+    cur+=ch;
+  }
+  out.push(cur);return out.map(s=>s.trim());
+}
+function parseCSVDate(s){
+  s=(s||'').trim();
+  let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/); if(m) return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+  m=s.match(/^(\d{1,2})[\/.](\d{1,2})[\/.](\d{4})/);
+  if(m){ let d=+m[1],mo=+m[2]; if(mo>12&&d<=12){[d,mo]=[mo,d];} if(mo>=1&&mo<=12&&d>=1&&d<=31) return `${m[3]}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
+  return null;
+}
+function parseCSVAmount(s){ const n=parseFloat((s||'').replace(/[฿$,\s]/g,'')); return isNaN(n)?null:n; }
+// Unquoted thousands separators ("1,240.00") split into extra columns — re-join
+// adjacent number fragments until the row matches the header count.
+function normalizeCSVRow(row,expected){
+  row=row.slice();
+  while(row.length>expected){
+    let merged=false;
+    for(let i=0;i<row.length-1;i++){
+      if(/^-?\d+$/.test(row[i])&&/^\d{3}(\.\d+)?$/.test(row[i+1])){
+        row.splice(i,2,row[i]+row[i+1]);merged=true;break;
+      }
+    }
+    if(!merged) break;
+  }
+  return row;
+}
+function parseCSVPreview(mode){
+  const raw=(document.getElementById('csvText').value||'').trim();
+  if(!raw) return;
+  const delim=[',',';','\t'].map(d=>({d,n:(raw.split('\n')[0].match(new RegExp(d==='\t'?'\t':'\\'+d,'g'))||[]).length})).sort((a,b)=>b.n-a.n)[0].d;
+  const lines=raw.split('\n').filter(l=>l.trim());
+  const headers=parseCSVLine(lines[0],delim);
+  const rows=lines.slice(1).map(l=>normalizeCSVRow(parseCSVLine(l,delim),headers.length));
+  _csvRows={headers,rows,delim};
+  const guess=(names)=>{const i=headers.findIndex(h=>names.some(n=>h.toLowerCase().includes(n)));return i>=0?i:0;};
+  const sel=(id,g)=>`<select id="${id}" style="font-size:11px;padding:4px 8px;border:1px solid var(--line);border-radius:6px">${headers.map((h,i)=>`<option value="${i}" ${i===g?'selected':''}>${h||('col '+(i+1))}</option>`).join('')}</select>`;
+  document.getElementById('csvMap').innerHTML=`<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:11px">
+    <span>Date: ${sel('csvColDate',guess(['date','วันที่']))}</span>
+    <span>${mode==='exp'?'Merchant':'Description'}: ${sel('csvColDesc',guess(['desc','merchant','detail','name','รายการ']))}</span>
+    <span>Amount: ${sel('csvColAmt',guess(['amount','amt','฿','thb','จำนวน']))}</span>
+  </div>`;
+  const preview=rows.slice(0,5).map(r=>`<tr><td class="mono">${parseCSVDate(r[+((document.getElementById('csvColDate')||{}).value||0)])||'?'}</td><td>${r[+((document.getElementById('csvColDesc')||{}).value||1)]||''}</td><td class="mono">${parseCSVAmount(r[+((document.getElementById('csvColAmt')||{}).value||2)])??'?'}</td></tr>`).join('');
+  document.getElementById('csvPreview').innerHTML=`<table class="tbl" style="font-size:10.5px"><thead><tr><th>Date</th><th>Description</th><th>Amount</th></tr></thead><tbody>${preview}</tbody></table><div style="font-size:10px;color:var(--tx3);margin-top:4px">${rows.length} rows detected. Adjust the column mapping above if the preview looks wrong, then hit Import.</div>`;
+}
+function commitCSVImport(mode){
+  if(!_csvRows) return alert('Paste your CSV and hit Preview first');
+  const di=+gv('csvColDate'),de=+gv('csvColDesc'),am=+gv('csvColAmt');
+  let ok=0,skip=0;
+  _csvRows.rows.forEach(r=>{
+    const date=parseCSVDate(r[di]),desc=(r[de]||'').trim(),amtRaw=parseCSVAmount(r[am]);
+    if(!date||amtRaw===null||!desc){skip++;return;}
+    const amt=Math.abs(amtRaw);
+    if(mode==='exp'){
+      S.expenses.unshift({date,merchant:desc,amount:amt,cat:'Other',acct:'Imported',type:'Imported'});
+    }else{
+      S.tx.unshift({date,from:desc,to:'—',amount:amt,type:amtRaw<0?'Payment out':'Transfer in',dir:amtRaw<0?'out':'in'});
+    }
+    ok++;
+  });
+  save();closeModal();renderAll();
+  showToast(`Imported ${ok} rows${skip?` · ${skip} skipped (bad date/amount)`:''}${mode==='exp'?' — review categories in Expenses':''}`);
+}
+
 /* --- ADD SIGNAL RULE MODAL --- */
 function addRule(){
   openModal('Add signal rule',`
@@ -1471,12 +1590,15 @@ function xirr(flows){
   }
   return (rate>-1&&rate<10)?rate:null;
 }
+function divTHB(d){return d.amount*(d.cur==='USD'?(d.fxAtDiv||S.profile.fxRate):1)}
 function mwrOf(h){
   const logs=S.dcaLog.filter(l=>l.ticker===h.ticker).sort((a,b)=>a.date.localeCompare(b.date));
   if(!logs.length) return null;
   const today=new Date(),firstDate=new Date(logs[0].date);
   if((today-firstDate)/(1000*60*60*24)<7) return null;
   const flows=logs.map(l=>({date:new Date(l.date),amount:-(l.amount*(h.cur==='USD'?(l.fxAtBuy||S.profile.fxRate):1))}));
+  (S.dividends||[]).filter(d=>d.ticker===h.ticker).forEach(d=>flows.push({date:new Date(d.date),amount:divTHB(d)}));
+  flows.sort((a,b)=>a.date-b.date);
   flows.push({date:today,amount:valTHB(h)});
   const r=xirr(flows);return r!==null?r*100:null;
 }
@@ -1487,9 +1609,46 @@ function portfolioMWR(){
     allFlows.push({date:new Date(l.date),amount:-(l.amount*(h.cur==='USD'?(l.fxAtBuy||S.profile.fxRate):1))});
   });
   if(!allFlows.length) return null;
+  (S.dividends||[]).forEach(d=>allFlows.push({date:new Date(d.date),amount:divTHB(d)}));
   allFlows.sort((a,b)=>a.date-b.date);
   allFlows.push({date:new Date(),amount:totalValue()});
   const r=xirr(allFlows);return r!==null?r*100:null;
+}
+/* ---------- PERFORMANCE ANALYTICS (TWR · drawdown · volatility) ----------
+   Computed from monthly growthHistory snapshots; each returns null until
+   enough real history exists (no synthetic backfill, by design). */
+function monthlyReturns(){
+  const gh=(S.growthHistory||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));
+  if(gh.length<2) return null;
+  const rets=[];
+  for(let i=1;i<gh.length;i++){
+    const flow=gh[i].totalInvested-gh[i-1].totalInvested;      // net new money this period
+    if(gh[i-1].totalValue<=0) continue;
+    rets.push((gh[i].totalValue-flow)/gh[i-1].totalValue-1);   // return excl. contributions
+  }
+  return rets.length?rets:null;
+}
+function twr(){
+  const rets=monthlyReturns(); if(!rets) return null;
+  const growth=rets.reduce((p,r)=>p*(1+r),1);
+  return (Math.pow(growth,12/rets.length)-1)*100;              // annualised %
+}
+function maxDrawdown(){
+  const gh=(S.growthHistory||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));
+  if(gh.length<2) return null;
+  let peak=gh[0].totalValue,mdd=0;
+  gh.forEach(g=>{peak=Math.max(peak,g.totalValue);if(peak>0)mdd=Math.min(mdd,(g.totalValue-peak)/peak);});
+  return mdd*100;                                              // ≤0, in %
+}
+function volatility(){
+  const rets=monthlyReturns(); if(!rets||rets.length<3) return null;
+  const mean=rets.reduce((s,r)=>s+r,0)/rets.length;
+  const sd=Math.sqrt(rets.reduce((s,r)=>s+(r-mean)**2,0)/(rets.length-1));
+  return sd*Math.sqrt(12)*100;                                 // annualised %
+}
+function dividends12M(){
+  const cutoff=new Date(Date.now()-365*86400000).toISOString().slice(0,10);
+  return (S.dividends||[]).filter(d=>d.date>=cutoff).reduce((s,d)=>s+divTHB(d),0);
 }
 
 /* ---------- GROWTH CHART — INVESTED VS VALUE ---------- */
@@ -1792,7 +1951,8 @@ function syncPrompt(){
     opportunities:S.opportunities||[],
     benchmarks:S.benchmarks||{},
     taxLots:(S.taxLots||[]),
-    growthHistory:(S.growthHistory||[])
+    growthHistory:(S.growthHistory||[]),
+    dividends:(S.dividends||[])
   },null,2);
   sendToChat('Please sync my Portfolio OS data to my Google Sheet "Portfolio OS — Master Ledger v2" (ID: 1ZMqx6qyCid3-3kyQRhkCmdxtdbwkyWZ68eOYDP7xdU4). Write each key to its matching tab: holdings→Holdings, dca→DCA_Schedule, dcaLog→DCA_Entry_Log, tx→Transactions, fx→FX_Rates, expenses→Expenses_Log, subs→Subscriptions, accounts→Account_Balances, tax.ded→Tax_Deductions, signalLog→Signal_Log, opportunities→Opportunities, taxLots→Tax_Lots, benchmarks→Settings (as key-value rows), growthHistory→Settings (as key-value rows, travels with benchmarks until a dedicated tab exists). Append new rows; do not overwrite existing rows unless the id matches. Here is my data:\n\n'+payload.slice(0,6000));
   setTimeout(()=>setSync('Sync requested — check Claude chat'),2000);
