@@ -1951,10 +1951,12 @@ function syncPrompt(){
     opportunities:S.opportunities||[],
     benchmarks:S.benchmarks||{},
     taxLots:(S.taxLots||[]),
-    growthHistory:(S.growthHistory||[]),
-    dividends:(S.dividends||[])
+    growthHistory:(S.growthHistory||[]).map(g=>({date:g.date,totalValue:Math.round(g.totalValue),totalInvested:Math.round(g.totalInvested)})),
+    dividends:(S.dividends||[]),
+    prices:S.prices,
+    taxIncome:{salary:employmentIncome(),rental:S.tax.rental||0,foreignRemitted:S.tax.foreignRemitted||0,year:S.profile.taxYear}
   },null,2);
-  sendToChat('Please sync my Portfolio OS data to my Google Sheet "Portfolio OS — Master Ledger v2" (ID: 1ZMqx6qyCid3-3kyQRhkCmdxtdbwkyWZ68eOYDP7xdU4). Write each key to its matching tab: holdings→Holdings, dca→DCA_Schedule, dcaLog→DCA_Entry_Log, tx→Transactions, fx→FX_Rates, expenses→Expenses_Log, subs→Subscriptions, accounts→Account_Balances, tax.ded→Tax_Deductions, signalLog→Signal_Log, opportunities→Opportunities, taxLots→Tax_Lots, benchmarks→Settings (as key-value rows), growthHistory→Settings (as key-value rows, travels with benchmarks until a dedicated tab exists). Append new rows; do not overwrite existing rows unless the id matches. Here is my data:\n\n'+payload.slice(0,6000));
+  sendToChat('Please sync my Portfolio OS data to my Google Sheet "Portfolio OS — Master Ledger v2" (ID: 1ZMqx6qyCid3-3kyQRhkCmdxtdbwkyWZ68eOYDP7xdU4). Write each key to its matching tab: holdings→Holdings (merge prices object into the current_price column by ticker; include target and earningsDate), dca→DCA_Schedule, dcaLog→DCA_Entry_Log (incl. fxAtBuy), tx→Transactions (incl. auto flag), fx→FX_Rates, expenses→Expenses_Log, subs→Subscriptions, accounts→Account_Balances, tax.ded→Tax_Deductions, taxIncome→Tax_Income (one row per source: salary/rental/foreignRemitted), rules→Settings (key-value rows, key "rule_N"), signalLog→Signal_Log, opportunities→Opportunities, taxLots→Tax_Lots (incl. fx_at_buy and cost_thb), benchmarks→Settings (key-value rows), growthHistory→Growth_History, dividends→Dividends. Append new rows; do not overwrite existing rows unless the id matches. If the payload below appears truncated (unclosed JSON), tell me and I will paste the exported JSON file instead. Here is my data:\n\n'+payload.slice(0,60000));
   setTimeout(()=>setSync('Sync requested — check Claude chat'),2000);
 }
 function askAnalyst(ticker){sendToChat(`[AI Desk · Aria the Analyst] Re-underwrite ${ticker}: latest quarter revenue, margin, guidance, current valuation, my buy/kill triggers. Return a STATUS (Accumulate/Hold/Trim) with rationale.`);}
