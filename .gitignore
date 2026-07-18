@@ -1,0 +1,17 @@
+# --- PRIVATE: personal financial details — never push to the public repo ---
+CLAUDE.md
+CLAUDE_CODE_PROMPT.md
+Portfolio-OS-ClaudeCode-Guide.md
+Portfolio-OS-Cowork-Prompt.md
+Portfolio-OS-Online-Setup-Cowork-Prompt.md
+Putt-Next-Steps-Go-Live.md
+Portfolio-OS-Guide.pdf
+playbook.md
+setup_portfolio_os.gs
+positions.json
+backups/
+reviews/
+Investment plan/
+
+# --- system junk ---
+.DS_Store

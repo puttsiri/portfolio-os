@@ -1,0 +1,18 @@
+{
+  "name": "Portfolio OS",
+  "short_name": "Portfolio OS",
+  "description": "Personal portfolio, tax and money management",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#0A0A0A",
+  "theme_color": "#0A0A0A",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%23A78BFA'/%3E%3Ctext x='256' y='352' text-anchor='middle' font-family='Arial' font-size='288' font-weight='bold' fill='white'%3EP%3C/text%3E%3C/svg%3E",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
