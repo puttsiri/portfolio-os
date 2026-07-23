@@ -342,6 +342,7 @@ input,select,textarea{font-family:var(--sans);font-size:13px}
       </div>
       <div class="body">
         <div class="signal" id="signalBanner"></div>
+        <div id="insightRow" class="mb14" style="display:flex;gap:10px;flex-wrap:wrap"></div>
         <div class="grid-2-1 mb14">
           <div class="card">
             <div class="row-between" style="margin-bottom:4px;flex-wrap:wrap;gap:8px">
@@ -357,6 +358,26 @@ input,select,textarea{font-family:var(--sans);font-size:13px}
           <div class="card">
             <div class="card-t">Allocation <span class="sub">by asset class</span></div>
             <div id="allocChart"></div>
+          </div>
+        </div>
+        <div class="grid-2-1 mb14">
+          <div class="card">
+            <div class="card-t">Growth attribution <span class="sub">what you put in vs what the market added</span></div>
+            <div id="attribChart"></div>
+          </div>
+          <div class="card">
+            <div class="card-t">P&L contribution <span class="sub">which holdings drive your gains</span></div>
+            <div id="contribChart"></div>
+          </div>
+        </div>
+        <div class="grid-2-1 mb14">
+          <div class="card">
+            <div class="card-t">Net worth <span class="sub">portfolio + cash accounts · monthly</span></div>
+            <div id="networthChart"></div>
+          </div>
+          <div class="card">
+            <div class="card-t">Money flow <span class="sub">this month</span></div>
+            <div id="flowChart"></div>
           </div>
         </div>
         <div class="grid3 mb14">
@@ -830,6 +851,71 @@ function multiLineChart(series,xLabels,h=130){
     <div style="display:flex;justify-content:space-between;margin-top:4px">${xLabels.map(x=>`<span style="font-size:9.5px;color:var(--tx3)">${x}</span>`).join('')}</div>
     <div style="margin-top:8px">${legend}</div>`;
 }
+/* Monthly series for dashboard charts: past snapshots + live current month */
+function dashSeries(){
+  const curMo=todayISO().slice(0,7);
+  const pts=(S.growthHistory||[]).slice().sort((a,b)=>a.date.localeCompare(b.date))
+    .filter(g=>g.date.slice(0,7)!==curMo)
+    .map(g=>({m:g.date.slice(0,7),inv:g.totalInvested,val:g.totalValue,acc:g.accountsTotal}));
+  pts.push({m:curMo,inv:totalCost(),val:totalValue(),acc:S.accounts.reduce((s,a)=>s+(a.bal||0),0)});
+  return pts;
+}
+/* Stacked band: invested area + gain/loss band up to value line */
+function bandChart(pts,h=130){
+  if(pts.length<2) return `<div style="font-size:11.5px;color:var(--tx3);padding:14px 0">One data point so far (${fmtTHBk(pts[0].inv)} in → ${fmtTHBk(pts[0].val)} value). The banded view builds automatically as monthly snapshots accrue.</div>`;
+  const w=400,pad=6,mx=Math.max(...pts.map(p=>Math.max(p.inv,p.val)))||1;
+  const x=i=>pad+i*(w-2*pad)/(pts.length-1), y=v=>h-8-(v/mx)*(h-24);
+  const line=(key)=>pts.map((p,i)=>(i?'L':'M')+x(i).toFixed(1)+','+y(p[key]).toFixed(1)).join(' ');
+  const invArea=line('inv')+` L${x(pts.length-1).toFixed(1)},${h-8} L${x(0).toFixed(1)},${h-8} Z`;
+  const band=line('val')+' '+pts.slice().reverse().map((p,j)=>'L'+x(pts.length-1-j).toFixed(1)+','+y(p.inv).toFixed(1)).join(' ')+' Z';
+  const lastGain=pts[pts.length-1].val-pts[pts.length-1].inv;
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="width:100%;height:${h}px">
+    <path d="${invArea}" fill="#EDE9FE"/>
+    <path d="${band}" fill="${lastGain>=0?'#6EE7B7':'#FBCFE8'}" opacity=".55"/>
+    <path d="${line('inv')}" fill="none" stroke="#A78BFA" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <path d="${line('val')}" fill="none" stroke="${lastGain>=0?'#059669':'#DC2626'}" stroke-width="2"/></svg>
+    <div style="display:flex;justify-content:space-between;margin-top:4px">${pts.map(p=>`<span style="font-size:9.5px;color:var(--tx3)">${p.m}</span>`).join('')}</div>
+    <div style="margin-top:8px;font-size:10px;color:var(--tx2)"><span style="color:#7C3AED">▨ You put in</span> · <span style="color:${lastGain>=0?'var(--grn)':'var(--red)'}">▨ Market ${lastGain>=0?'added':'took'} ${fmtTHBk(Math.abs(lastGain))}</span></div>`;
+}
+/* Signed horizontal bars (gain/loss per holding) */
+function signedBars(items){
+  const mx=Math.max(...items.map(i=>Math.abs(i.v)))||1;
+  return items.map(i=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:11px">
+    <span style="width:56px;font-family:var(--mono);font-weight:700">${i.l}</span>
+    <div style="flex:1;position:relative;height:9px;background:var(--line2);border-radius:5px">
+      <div style="position:absolute;left:50%;top:0;height:100%;border-radius:3px;${i.v>=0?`background:var(--mint2);width:${(Math.abs(i.v)/mx*50).toFixed(1)}%`:`background:var(--blush2);width:${(Math.abs(i.v)/mx*50).toFixed(1)}%;transform:translateX(-100%)`}"></div>
+      <div style="position:absolute;left:50%;top:-1px;height:11px;width:1.5px;background:var(--line)"></div>
+    </div>
+    <span class="mono ${i.v>=0?'pos':'neg'}" style="width:66px;text-align:right">${i.v>=0?'+':''}${fmtTHBk(i.v)}</span></div>`).join('');
+}
+/* Money-flow sankey-lite: income splitting into invested / spent / saved */
+function flowSankey(income,parts,h=150){
+  if(income<=0) return '<div class="empty" style="padding:18px">No income logged this month yet — salary auto-logs on the 25th</div>';
+  const w=400,x1=86,x2=308,bw=10,gap=7;
+  const shown=parts.filter(p=>p.v>0);
+  const total=Math.max(income,shown.reduce((s,p)=>s+p.v,0))||1;
+  const scale=(h-20-gap*Math.max(0,shown.length-1))/total;
+  const leftH=Math.max(4,income*scale);
+  let srcY=10,ry=10,out='';
+  shown.forEach(p=>{const ph=Math.max(4,p.v*scale);
+    out+=`<path d="M${x1+bw},${srcY} C205,${srcY} 205,${ry} ${x2},${ry} L${x2},${ry+ph} C205,${ry+ph} 205,${srcY+ph} ${x1+bw},${srcY+ph} Z" fill="${p.c}" opacity=".4"/>
+    <rect x="${x2}" y="${ry}" width="${bw}" height="${ph}" rx="3" fill="${p.c}"/>
+    <text x="${x2+bw+5}" y="${ry+ph/2+3.5}" font-size="9.5" font-family="Inter" fill="#6B7280">${p.l} ${fmtTHBk(p.v)}</text>`;
+    srcY+=ph;ry+=ph+gap;});
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:${h}px">
+    <rect x="${x1-bw}" y="10" width="${bw}" height="${leftH}" rx="3" fill="#A78BFA"/>
+    <text x="${x1-bw-5}" y="${10+leftH/2+3.5}" font-size="9.5" font-family="Inter" fill="#6B7280" text-anchor="end">In ${fmtTHBk(income)}</text>
+    ${out}</svg>`;
+}
+/* YTD attribution: contributions vs market growth */
+function ytdAttribution(){
+  const yr=todayISO().slice(0,4);
+  const contrib=(S.taxLots||[]).filter(l=>l.purchase_date.slice(0,4)===yr).reduce((s,l)=>s+(l.cost_thb||0),0);
+  const gh=(S.growthHistory||[]).filter(g=>g.date.slice(0,4)===yr).sort((a,b)=>a.date.localeCompare(b.date));
+  let market=null;
+  if(gh.length){const f=gh[0];market=(totalValue()-f.totalValue)-(totalCost()-f.totalInvested);}
+  return {contrib,market};
+}
 function barChart(items,color){
   const mx=Math.max(...items.map(i=>i.v))||1;
   return items.map(i=>`<div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--tx2)">${i.l}</span><span style="font-weight:600;color:var(--tx)">${fmtTHB(i.v)}</span></div><div class="bar"><i style="width:${i.v/mx*100}%;background:${color||'var(--lav2)'}"></i></div></div>`).join('');
@@ -849,7 +935,7 @@ function renderDashboard(){
   document.getElementById('heroSub').textContent=`${S.rules.length} rules armed · ${S.dca.length} DCA schedules · THB/USD ${S.profile.fxRate}`;
   document.getElementById('kpis').innerHTML=`
     <div class="kpi k1"><div class="kpi-top"><div class="kpi-ic">▦</div><div class="kpi-l">Total value</div></div><div class="kpi-v">${fmtTHBk(tv)}</div><div class="kpi-bot"><span class="kpi-tag pos">${pct(roi)} all-time</span>${spark('#A78BFA')}</div><div style="font-size:10px;color:#6B7280;margin-top:5px">${fmtUSD(usd)} USD · MWR ${(()=>{const m=portfolioMWR();return m!==null?(m>=0?'+':'')+m.toFixed(1)+'%/yr':'—'})()}</div></div>
-    <div class="kpi k2"><div class="kpi-top"><div class="kpi-ic">◎</div><div class="kpi-l">Unrealised P&L</div></div><div class="kpi-v">${pl>=0?'+':''}${fmtTHBk(pl)}</div><div class="kpi-bot"><span class="kpi-tag pos">vs ${fmtTHBk(tc)} in</span>${spark('#6EE7B7')}</div></div>
+    <div class="kpi k2"><div class="kpi-top"><div class="kpi-ic">◎</div><div class="kpi-l">Unrealised P&L</div></div><div class="kpi-v">${pl>=0?'+':''}${fmtTHBk(pl)}</div><div class="kpi-bot"><span class="kpi-tag pos">vs ${fmtTHBk(tc)} in</span>${spark('#6EE7B7')}</div><div style="font-size:10px;color:#6B7280;margin-top:5px">${(()=>{const a=ytdAttribution();return a.contrib>0?`YTD: ${fmtTHBk(a.contrib)} you · ${a.market!==null?(a.market>=0?'+':'')+fmtTHBk(a.market):'—'} market`:''})()}</div></div>
     <div class="kpi k3"><div class="kpi-top"><div class="kpi-ic">⛨</div><div class="kpi-l">Tax saved YTD</div></div><div class="kpi-v">${fmtTHBk(saved)}</div><div class="kpi-bot"><span class="kpi-tag ambx">of ${fmtTHBk(taxSavedMax())} max</span>${spark('#FDE68A')}</div></div>
     <div class="kpi k4"><div class="kpi-top"><div class="kpi-ic">▤</div><div class="kpi-l">Expenses MTD</div></div><div class="kpi-v">${fmtTHBk(mtd)}</div><div class="kpi-bot"><span class="kpi-tag" style="color:#BE185D">${nextDca?'DCA '+nextDca.ticker+' soon':''}</span>${spark('#FBCFE8')}</div><div style="font-size:10px;color:#6B7280;margin-top:5px">${(()=>{const bm=S.benchmarks||{spy:{ytd:0}};const pp=(tc?(tv-tc)/tc*100:0)-(bm.spy.ytd||0);return 'vs S&P: '+(pp>=0?'+':'')+pp.toFixed(1)+'pp'})()}</div></div>`;
 
@@ -884,6 +970,39 @@ function renderDashboard(){
   document.getElementById('growthChart').innerHTML=multiLineChart(series,gs.xLabels,130);
   const allocSeg=Object.entries(S.holdings.reduce((a,h)=>{a[h.type]=(a[h.type]||0)+valTHB(h);return a},{})).map(([k,v])=>({k,v,c:ALLOCCOLORS[k]}));
   document.getElementById('allocChart').innerHTML=`<div class="gauge-wrap" style="gap:16px"><div>${donut(allocSeg,'Total',fmtTHBk(tv))}</div><div class="donut-legend" style="flex:1">${allocSeg.map(s=>`<div class="dl-row"><span class="dl-dot" style="background:${s.c}"></span>${s.k[0].toUpperCase()+s.k.slice(1)}<span class="dl-pct">${fmtTHBk(s.v)} · ${Math.round(s.v/tv*100)}%</span></div>`).join('')}</div></div>`;
+
+  // --- Growth attribution (you vs market) ---
+  const dpts=dashSeries();
+  document.getElementById('attribChart').innerHTML=bandChart(dpts,130);
+  // --- P&L contribution per holding ---
+  const contrib=S.holdings.map(h=>({l:h.ticker,v:valTHB(h)-costTHB(h)})).sort((a,b)=>b.v-a.v);
+  document.getElementById('contribChart').innerHTML=contrib.length?signedBars(contrib):'<div class="empty">No holdings yet</div>';
+  // --- Net worth (portfolio + cash accounts) ---
+  const nwPts=dpts.filter(p=>p.acc!==undefined&&p.acc!==null);
+  document.getElementById('networthChart').innerHTML=nwPts.length>=2
+    ?multiLineChart([{label:'Net worth',color:'#A78BFA',points:nwPts.map(p=>({x:p.m,v:p.val+p.acc}))},{label:'Portfolio only',color:'#6EE7B7',dashed:true,points:nwPts.map(p=>({x:p.m,v:p.val}))}],nwPts.map(p=>p.m),130)
+    :`<div style="padding:10px 0"><div style="font-size:22px;font-weight:700" class="mono">${fmtTHBk((nwPts[0]?nwPts[0].val+nwPts[0].acc:tv))}</div><div style="font-size:11px;color:var(--tx2);margin-top:2px">portfolio ${fmtTHBk(tv)} + cash ${fmtTHBk(S.accounts.reduce((s,a)=>s+(a.bal||0),0))}</div><div style="font-size:10.5px;color:var(--tx3);margin-top:8px">Trend line builds as monthly snapshots accrue.</div></div>`;
+  // --- Money flow this month ---
+  const moNow=todayISO().slice(0,7);
+  const incomeMo=S.tx.filter(t=>t.dir==='in'&&t.date.slice(0,7)===moNow).reduce((s,t)=>s+t.amount,0);
+  const investedMo=S.tx.filter(t=>t.dir==='move'&&t.date.slice(0,7)===moNow).reduce((s,t)=>s+t.amount,0);
+  const spentMo=mtd;
+  const savedMo=incomeMo-investedMo-spentMo;
+  document.getElementById('flowChart').innerHTML=flowSankey(incomeMo,[
+    {l:'Invested',v:investedMo,c:'#6EE7B7'},{l:'Spent',v:spentMo,c:'#FBCFE8'},{l:savedMo>=0?'Saved':'Overspent',v:Math.abs(savedMo),c:savedMo>=0?'#A78BFA':'#F87171'}
+  ],150)+(savedMo<0?'<div style="font-size:10px;color:var(--red);margin-top:4px">Outflows exceed income this month.</div>':'');
+  // --- Insight cards (rule-based) ---
+  const insights=[];
+  const moPrev=new Date();moPrev.setMonth(moPrev.getMonth()-1);const prevStr=moPrev.toISOString().slice(0,7);
+  const spentPrev=S.expenses.filter(e=>e.date.slice(0,7)===prevStr).reduce((s,e)=>s+e.amount,0);
+  if(spentPrev>0&&spentMo>0){const chg=(spentMo-spentPrev)/spentPrev*100;if(Math.abs(chg)>=15)insights.push(`${chg>0?'📈':'📉'} Spending ${chg>0?'up':'down'} <b>${Math.abs(chg).toFixed(0)}%</b> vs last month (${fmtTHBk(spentMo)} vs ${fmtTHBk(spentPrev)})`);}
+  if(contrib.length&&pl>0){const top=contrib[0];const share=top.v/pl*100;if(share>=40)insights.push(`🏆 <b>${top.l}</b> drives <b>${share.toFixed(0)}%</b> of your total gains (${fmtTHBk(top.v)})`);}
+  const att=ytdAttribution();
+  if(att.contrib>0)insights.push(`💪 This year: <b>${fmtTHBk(att.contrib)}</b> contributed by you${att.market!==null?` · <b class="${att.market>=0?'pos':'neg'}">${att.market>=0?'+':''}${fmtTHBk(att.market)}</b> by the market`:''}`);
+  const driftN=S.holdings.filter(h=>h.target>0&&Math.abs((tv?valTHB(h)/tv*100:0)-h.target)>5).length;
+  if(driftN)insights.push(`⚖️ <b>${driftN}</b> holding${driftN>1?'s':''} drifted >5pp from target — see Rebalance card`);
+  document.getElementById('insightRow').innerHTML=insights.slice(0,4).map(t=>`<div class="card" style="padding:10px 14px;font-size:11.5px;flex:1;min-width:210px">${t}</div>`).join('');
+  document.getElementById('insightRow').style.display=insights.length?'flex':'none';
 
   document.getElementById('taxMini').innerHTML=`<div class="mtile"><div class="v">${fmtTHBk(saved)}</div><div class="s pos">of ${fmtTHBk(taxSavedMax())} potential</div><div class="bar" style="margin-top:8px"><i style="width:${Math.min(100,saved/taxSavedMax()*100)}%"></i></div></div>`;
   document.getElementById('expMini').innerHTML=`<div class="mtile"><div class="v">${fmtTHB(mtd)}</div><div class="s" style="color:var(--tx2)">${S.expenses.filter(e=>e.date.slice(0,7)===todayISO().slice(0,7)).length} transactions this month</div></div>`;
@@ -1786,6 +1905,7 @@ function checkMonthlySnapshot(){
     date:todayISO(),
     totalValue:totalValue(),
     totalInvested:totalCost(),
+    accountsTotal:S.accounts.reduce((s,a)=>s+(a.bal||0),0),
     byHolding:S.holdings.map(h=>({ticker:h.ticker,type:h.type,value:valTHB(h),invested:costTHB(h)}))
   });
   save();
