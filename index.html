@@ -280,7 +280,7 @@ input,select,textarea{font-family:var(--sans);font-size:13px}
         <button class="tb-btn" onclick="refreshPrices();closeSidebar()"><span>↻</span> Prices</button>
         <button class="tb-btn" onclick="openGuide();closeSidebar()"><span>◉</span> Guide</button>
         <button class="tb-btn" onclick="exportJSON();closeSidebar()"><span>↓</span> Export</button>
-        <button class="tb-btn accent" onclick="syncPrompt();closeSidebar()"><span>↑</span> Sync Sheet</button>
+        <button class="tb-btn accent" onclick="syncToSheet();closeSidebar()"><span>↑</span> Sync Sheet</button>
       </div>
     </div>
     <div class="sb-sect">Overview</div>
@@ -323,7 +323,7 @@ input,select,textarea{font-family:var(--sans);font-size:13px}
         <button class="tb-btn" onclick="refreshPrices()"><span>↻</span> Prices</button>
         <button class="tb-btn" onclick="openGuide()"><span>◉</span> Guide</button>
         <button class="tb-btn" onclick="exportJSON()"><span>↓</span> Export</button>
-        <button class="tb-btn accent" onclick="syncPrompt()"><span>↑</span> Sync Sheet</button>
+        <button class="tb-btn accent" onclick="syncToSheet()"><span>↑</span> Sync Sheet</button>
         <div class="tb-avatar">P</div>
       </div>
     </div>
@@ -596,7 +596,7 @@ const uid=()=>Math.random().toString(36).slice(2,9);
 
 /* ---------- DEFAULT STATE (seeded) ---------- */
 const DEFAULT={
-  profile:{name:'Putt',taxYear:2026,salaryMonthly:140000,decBonus:140000,marBonusMonths:0,fxRate:33.2,apiKey:'',finnhubKey:''},
+  profile:{name:'Putt',taxYear:2026,salaryMonthly:140000,decBonus:140000,marBonusMonths:0,fxRate:33.2,apiKey:'',finnhubKey:'',bridgeUrl:'',bridgeToken:''},
   prices:{TSM:185.20,AMZN:220.50,ASML:1020,MU:148,ThaiESG:14.20,RMF:18.6,BTC:3120000},
   holdings:[
     {id:'h1',ticker:'TSM',name:'Taiwan Semiconductor',type:'stock',broker:'IBKR',cur:'USD',units:42,avg:168.40,tax:false,signal:'Accumulate',earningsDate:'2026-07-17'},
@@ -714,7 +714,7 @@ async function handleSession(session){
 // API keys are device-local secrets: never uploaded, and preserved across cloud pulls.
 function sanitizedForCloud(){
   const c=JSON.parse(JSON.stringify(S));
-  if(c.profile){ delete c.profile.apiKey; delete c.profile.finnhubKey; }
+  if(c.profile){ delete c.profile.apiKey; delete c.profile.finnhubKey; delete c.profile.bridgeToken; }
   return c;
 }
 async function cloudPull(){
@@ -722,10 +722,11 @@ async function cloudPull(){
     const {data,error}=await sb.from('portfolio_state').select('data').eq('user_id',cloudUser.id).maybeSingle();
     if(error) throw error;
     if(data&&data.data){
-      const localApiKey=S.profile&&S.profile.apiKey||'', localFinnhub=S.profile&&S.profile.finnhubKey||'';
+      const localApiKey=S.profile&&S.profile.apiKey||'', localFinnhub=S.profile&&S.profile.finnhubKey||'', localBridgeTok=S.profile&&S.profile.bridgeToken||'';
       S=mergeDefaults(DEFAULT,data.data);
       if(localApiKey) S.profile.apiKey=localApiKey;
       if(localFinnhub) S.profile.finnhubKey=localFinnhub;
+      if(localBridgeTok) S.profile.bridgeToken=localBridgeTok;
       localStorage.setItem(KEY,JSON.stringify(S));
     }
     else { await cloudPush(true); }   // first login on this account — seed cloud from local
@@ -1233,7 +1234,9 @@ function renderSettings(){
     <div class="field-row"><div class="field"><label>Rental income / yr (฿)</label><input id="cfg_rent" type="number" value="${S.tax.rental||0}"></div><div class="field"><label>Foreign income remitted (฿)</label><input id="cfg_for" type="number" value="${S.tax.foreignRemitted||0}"></div></div>
     <div class="field"><label>Anthropic API key <span style="font-weight:400;color:var(--tx3)">(for live AI Desk responses)</span></label><input id="cfg_apiKey" type="password" placeholder="sk-ant-…" value="${p.apiKey||''}"></div>
     <div class="field"><label>Finnhub API key <span style="font-weight:400;color:var(--tx3)">(optional — live US stock prices; free at finnhub.io/register)</span></label><input id="cfg_finnhubKey" type="password" placeholder="paste free Finnhub key" value="${p.finnhubKey||''}"></div>
-    <div style="font-size:10px;color:var(--tx3);margin-top:-4px;margin-bottom:8px">Both keys stay on this device only — they are never uploaded to cloud sync.</div>
+    <div class="field"><label>Sheet Bridge URL <span style="font-weight:400;color:var(--tx3)">(optional — Apps Script web-app /exec URL; enables direct prices + Sheet sync)</span></label><input id="cfg_bridgeUrl" placeholder="https://script.google.com/macros/s/…/exec" value="${p.bridgeUrl||''}"></div>
+    <div class="field"><label>Sheet Bridge token</label><input id="cfg_bridgeToken" type="password" placeholder="BRIDGE_TOKEN from the Apps Script" value="${p.bridgeToken||''}"></div>
+    <div style="font-size:10px;color:var(--tx3);margin-top:-4px;margin-bottom:8px">Secrets (API keys, bridge token) stay on this device only — never uploaded to cloud sync.</div>
     <button class="btn" onclick="saveProfile()">Save profile</button>`;
   // Inject benchmark card dynamically after Settings view renders
   const settingsBody=document.querySelector('#view-settings .body');
@@ -1266,6 +1269,8 @@ function saveProfile(){
   S.tax.rental=get('cfg_rent');S.tax.foreignRemitted=get('cfg_for');
   S.profile.apiKey=getStr('cfg_apiKey');
   S.profile.finnhubKey=getStr('cfg_finnhubKey');
+  S.profile.bridgeUrl=getStr('cfg_bridgeUrl');
+  S.profile.bridgeToken=getStr('cfg_bridgeToken');
   save();renderDashboard();renderTax();renderAI();showToast('Profile saved ✓');
 }
 function saveBenchmarks(){
@@ -1986,9 +1991,21 @@ async function fetchLivePrices(){
   if(!btn) return;
   btn.disabled=true; btn.textContent='Fetching…';
   const got=[], failed=[];
+  const filled=new Set();
   const mark=(id,val)=>{const el=document.getElementById('pr_'+id);const tag=document.getElementById('prLive_'+(id==='fxRate'?'fx':id));if(el&&val>0){el.value=val;if(tag)tag.textContent='· live';}};
+  // Sheet Bridge first: one call covers stocks + FX + BTC via GOOGLEFINANCE
+  if(S.profile.bridgeUrl){
+    try{
+      const r=await fetch(S.profile.bridgeUrl);const j=await r.json();
+      const bp=j&&j.prices||{};
+      const usdthb=bp.USDTHB>0?bp.USDTHB:null;
+      if(usdthb){ mark('fxRate',+usdthb.toFixed(2)); filled.add('fx'); got.push('THB/USD·sheet'); }
+      if(bp.BTCUSD>0&&usdthb&&S.holdings.some(h=>h.ticker==='BTC')){ mark('BTC',Math.round(bp.BTCUSD*usdthb)); filled.add('BTC'); got.push('BTC·sheet'); }
+      S.holdings.filter(h=>h.cur==='USD'&&h.ticker!=='BTC').forEach(h=>{ if(bp[h.ticker]>0){ mark(h.ticker,+bp[h.ticker].toFixed(2)); filled.add(h.ticker); got.push(h.ticker+'·sheet'); } });
+    }catch(e){ failed.push('bridge unreachable'); }
+  }
   // FX (THB per USD) — two keyless sources, first that answers wins
-  let fxOk=false;
+  let fxOk=filled.has('fx');
   for(const src of ['https://open.er-api.com/v6/latest/USD','https://api.frankfurter.dev/v1/latest?base=USD&symbols=THB']){
     if(fxOk) break;
     try{
@@ -1999,14 +2016,14 @@ async function fetchLivePrices(){
   }
   if(!fxOk) failed.push('FX');
   // BTC in THB
-  if(S.holdings.some(h=>h.ticker==='BTC')){
+  if(S.holdings.some(h=>h.ticker==='BTC')&&!filled.has('BTC')){
     try{
       const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=thb');const j=await r.json();
       if(j&&j.bitcoin&&j.bitcoin.thb){ mark('BTC',Math.round(j.bitcoin.thb)); got.push('BTC'); } else failed.push('BTC');
     }catch(e){ failed.push('BTC'); }
   }
   // US-listed stocks/ETFs via Finnhub (optional key)
-  const usTickers=S.holdings.filter(h=>h.cur==='USD'&&h.ticker!=='BTC').map(h=>h.ticker);
+  const usTickers=S.holdings.filter(h=>h.cur==='USD'&&h.ticker!=='BTC'&&!filled.has(h.ticker)).map(h=>h.ticker);
   if(usTickers.length){
     if(S.profile.finnhubKey){
       for(const t of usTickers){
@@ -2054,9 +2071,8 @@ function sendToChat(text){
   } else {fallback();}
 }
 
-function syncPrompt(){
-  setSync('Syncing…');
-  const payload=JSON.stringify({
+function buildSyncPayload(){
+  return {
     holdings:S.holdings,
     dca:S.dca,
     dcaLog:S.dcaLog,
@@ -2075,7 +2091,27 @@ function syncPrompt(){
     dividends:(S.dividends||[]),
     prices:S.prices,
     taxIncome:{salary:employmentIncome(),rental:S.tax.rental||0,foreignRemitted:S.tax.foreignRemitted||0,year:S.profile.taxYear}
-  },null,2);
+  };
+}
+/* Direct Sheet sync via the Apps Script Bridge; falls back to the Claude-chat
+   flow when no bridge is configured. text/plain body avoids a CORS preflight. */
+async function syncToSheet(){
+  if(!(S.profile.bridgeUrl&&S.profile.bridgeToken)) return syncPrompt();
+  setSync('Syncing to Sheet…');
+  try{
+    const r=await fetch(S.profile.bridgeUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({token:S.profile.bridgeToken,payload:buildSyncPayload()})});
+    const j=await r.json();
+    if(j&&j.ok){ setSync('Sheet synced ✓'); showToast(`Sheet synced — ${ (j.written||[]).length } tabs updated`); return; }
+    throw new Error(j&&j.error||'bridge error');
+  }catch(e){
+    setSync('Bridge failed — using chat');
+    showToast('Bridge sync failed ('+e.message+') — falling back to Claude chat');
+    syncPrompt();
+  }
+}
+function syncPrompt(){
+  setSync('Syncing…');
+  const payload=JSON.stringify(buildSyncPayload(),null,2);
   sendToChat('Please sync my Portfolio OS data to my Google Sheet "Portfolio OS — Master Ledger v2" (ID: 1ZMqx6qyCid3-3kyQRhkCmdxtdbwkyWZ68eOYDP7xdU4). Write each key to its matching tab: holdings→Holdings (merge prices object into the current_price column by ticker; include target and earningsDate), dca→DCA_Schedule, dcaLog→DCA_Entry_Log (incl. fxAtBuy), tx→Transactions (incl. auto flag), fx→FX_Rates, expenses→Expenses_Log, subs→Subscriptions, accounts→Account_Balances, tax.ded→Tax_Deductions, taxIncome→Tax_Income (one row per source: salary/rental/foreignRemitted), rules→Settings (key-value rows, key "rule_N"), signalLog→Signal_Log, opportunities→Opportunities, taxLots→Tax_Lots (incl. fx_at_buy and cost_thb), benchmarks→Settings (key-value rows), growthHistory→Growth_History, dividends→Dividends. Append new rows; do not overwrite existing rows unless the id matches. If the payload below appears truncated (unclosed JSON), tell me and I will paste the exported JSON file instead. Here is my data:\n\n'+payload.slice(0,60000));
   setTimeout(()=>setSync('Sync requested — check Claude chat'),2000);
 }
